@@ -35,6 +35,7 @@ namespace SRL
 		float getSpeed(void);
 		
 		void setSpeed(float speed);
+		unsigned int getDirection(void);
 
 	private:
 		unsigned int forwardPin;
@@ -42,6 +43,8 @@ namespace SRL
 		unsigned int pwmPin;
 
 		float speed;
+		unsigned int direction;
+		bool moving;
 	};
 }
 #endif

@@ -13,37 +13,49 @@ SRL::Motor::Motor(unsigned int forwardPin, unsigned int backwardPin, unsigned in
 	pinMode(this->forwardPin, OUTPUT);
 	pinMode(this->backwardPin, OUTPUT);
 	pinMode(this->pwmPin, OUTPUT);
+	
+	forwards();
+	stop();
 
-	this->speed = 0.0f;
+	setSpeed(100.0f);
 }
 
 void SRL::Motor::start(void)
 {
-	analogWrite(pwmPin, (int)(SRL::PWM_MAX_VALUE / 100U) * speed);
+	analogWrite(pwmPin, (int ((SRL::PWM_MAX_VALUE / 100.0f) * speed)));
+	moving = true;
 }
 
 void SRL::Motor::stop(void)
 {
 	digitalWrite(pwmPin, LOW);
+	moving = false;
 }
 
-void SRL::Motor::setDirection(const unsigned int state)
+void SRL::Motor::setDirection(unsigned int state)
 {
 	switch (state)
 	{
 		case FORWARD:
 			digitalWrite(forwardPin, HIGH);
 			digitalWrite(backwardPin, LOW);
+			direction = state;
 			break;
 
 		case BACKWARD:
 			digitalWrite(backwardPin, HIGH);
 			digitalWrite(forwardPin, LOW);
+			direction = state;
 			break;
 		
 		default:
 			break;
 	}
+}
+
+unsigned int SRL::Motor::getDirection(void)
+{
+	return direction;
 }
 
 void SRL::Motor::forwards(void)
@@ -81,5 +93,10 @@ void SRL::Motor::setSpeed(float speed)
 	if (speed >= 0 && speed <= 100)
 	{
 		this->speed = speed;
+		
+		if (moving)
+		{
+			start();
+		}
 	}
 }
