@@ -2,7 +2,7 @@
 // 
 // 
 
-#include "../Angle.h"
+#include <Angle.h>
 
 SRL::Angle::Angle(float size)
 {

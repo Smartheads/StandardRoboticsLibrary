@@ -2,7 +2,7 @@
 // 
 // 
 
-#include "../Vector.h"
+#include <Vector.h>
 
 SRL::Vector::Vector(double x, double y)
 {

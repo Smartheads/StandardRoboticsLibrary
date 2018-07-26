@@ -3,23 +3,14 @@
 #ifndef _ROVER_h
 #define _ROVER_h
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
-#else
-#include "WProgram.h"
-#endif
-
-#include "../Motor/Motor.h"
-#include <NewPing/src/NewPing.h>
-#include <MPU6050_tockn/src/MPU6050_tockn.h>
-#include <DueTimer/DueTimer.h>
-#include <Encoder/Encoder.h>
-#include "../Angle/Angle.h"
-#include "../Vector/Vector.h"
-
-#define NUM_OF_SONAR 2
-#define GYROSCOPE_INTERVAL 100
-#define UPDATE_POSITION_INTERAL 500
+#include <SRL.h>
+#include <NewPing.h>
+#include <MPU6050_tockn.h>
+#include <DueTimer.h>
+#include <Encoder.h>
+#include <Angle.h>
+#include <Vector.h>
+#include <Motor.h>
 
 namespace SRL
 {
@@ -46,6 +37,13 @@ namespace SRL
 
 			/* Other */
 			void calcGyroOffsets(bool console = false, unsigned int sampleSize = 3000);
+			
+			/* Enums */
+			enum consts
+			{
+				GYROSCOPE_INTERVAL = 100,
+				UPDATE_POSITION_INTERAL = 500
+			};
 
 		private:
 			SRL::Motor* leftMotor;

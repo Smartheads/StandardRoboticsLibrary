@@ -2,7 +2,7 @@
 // 
 // 
 
-#include "../Motor.h"
+#include <Motor.h>
 
 SRL::Motor::Motor(unsigned int forwardPin, unsigned int backwardPin, unsigned int pwmPin)
 {

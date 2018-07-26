@@ -2,7 +2,7 @@
 // 
 // 
 
-#include "Rover.h"
+#include <Rover.h>
 
 SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction)
 {
@@ -49,12 +49,11 @@ void SRL::Rover::init(void)
 	if (mpu != NULL)
 	{
 		mpu->begin();
-		Timer0.attachInterrupt(this->updateDirection).start(GYROSCOPE_INTERVAL);
 	}
 
 	if (leftEncoder != NULL && rightEncoder != NULL)
 	{
-		Timer1.attachInterrupt(this->updatePosition).start(UPDATE_POSITION_INTERAL);
+
 	}
 }
 
