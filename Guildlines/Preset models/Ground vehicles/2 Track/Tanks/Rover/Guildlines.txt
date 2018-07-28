@@ -1,0 +1,41 @@
+Smart Crew 2012 Rover Technologies
+
+In Dobsinalia All Rights Reserved.
+
+--
+
+SCSRL Guidelines, Paragraph: Rovers (VERSION: 1204) SCSRLG/RG1204
+
+DATE: 2018.07.28
+
+Table of contents:
+1. Introduction
+2. Definition of an SCSRL rover
+3. Structural requirements of an SCSRL rover
+4. Hardware requirements of an SCSRL rover
+5. Software implementation of an SCSRL rover
+
+1. Introduction
+SCSRL is a robotics development framework developed by Smart Crew 2012 Rover Technologies. The framework is designed to provide easy to use functions, which allow complex, but maintainable and expandable robotics development.
+
+2. Definition of an SCSRL rover
+An SCRSL rover is a special type of tank, which has sensors capable of keeping track of the rover's real-time position & orientation. The rover may contain other components other than the mandatory ones.
+
+3. Structural requirements of an SCSRL rover
+The library only provides functionality for the required components of an object. The structural requirements of an SCSRL rover are the following:
+ * All the structural requirements of an SCSRL tank (SEE: Tank Guidelines)
+
+4. Hardware requirements of an SCSRL rover
+The hardware requirements of an SCSRL rover are the following:
+ * All the hardware requirements of an SCSRL tank
+ * An accelerometer
+ * A gyroscope
+ * A distance measuring tool (i.e. rotary encoders)
+
+5. Software implementation of an SCSRL rover
+The SCSRL framework provides a multitude of functions to enable rover-type robots development. There are the following:
+ * All the implementations of an SCSRL tank
+ * Interrupt based directional monitoring
+ * Directional and given distance movement commands
+
+EOF

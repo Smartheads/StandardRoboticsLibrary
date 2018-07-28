@@ -11,24 +11,30 @@ DATE: 2018.07.26
 Table of contents:
 1. Introduction
 2. Definition of a SCSRL tank
-3. Structural requirments of a SCSRL tank
-4. Hardware requirments of a SCSRL tank
+3. Structural requirements of an SCSRL tank
+4. Hardware requirements of an SCSRL tank
+5. Software implementation of an SCSRL tank
 
-1. Intoduction
+1. Introduction
 SCSRL is a robotics development framework developed by Smart Crew 2012 Rover Technologies. The framework is designed to provide easy to use functions, which allow complex, but maintainable and expandable robotics development.
 
 2. Definition of an SCSRL tank
-An SCSRL tank is a ground vehicle, which has 2 tracks, both on seperate drive shafts. The tank may or might not have other hardware objects, like sensors / other servos.
+An SCSRL tank is a ground vehicle, which has 2 tracks, both on separate drive shafts. The tank may or might not have other hardware objects, like sensors / other servos.
 
-3. Structural requirments of a SCSRL tank
-The library only provides functionality for the required components of an object. The structural requirments of an SCSRL tank are the following:
+3. Structural requirements of a SCSRL tank
+The library only provides functionality for the required components of an object. The structural requirements of an SCSRL tank are the following:
  * Rectangular footprint
- * Circular diameter drive shafts
+ * 2 separate drive shafts
 
-4. Hardware requirments of an SCRSL tank
-The hardware requirments of an SCRSL tank are the following:
+4. Hardware requirements of an SCRSL tank
+The hardware requirements of an SCRSL tank are the following:
  * Arduino microcontroller (or Arduino compatible)
  * H-bridge 2 DC motor controller
  * 2 DC motors (driving the tracks)
- 
+
+5. Software implementation of an SCSRL tank
+The SCSRL framework provides a multitude of functions to enable tank-type robots development. There are the following:
+ * Motor control:
+  * Individual motor control
+  * Synchronized motor control
  EOF
