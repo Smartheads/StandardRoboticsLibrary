@@ -1,0 +1,65 @@
+/*
+* MIT License
+*
+* Copyright (c) 2018 Robert Hutter
+*
+* Permission is hereby granted, free of charge, to any person obtaining a copy
+* of this software and associated documentation files (the "Software"), to deal
+* in the Software without restriction, including without limitation the rights
+* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+* copies of the Software, and to permit persons to whom the Software is
+* furnished to do so, subject to the following conditions:
+*
+* The above copyright notice and this permission notice shall be included in all
+* copies or substantial portions of the Software.
+*
+* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+* SOFTWARE.
+*/
+#ifndef _GYROSCOPE_H
+#define _GYROSCOPE_H
+
+#include <SRL.h>
+
+namespace SRL
+{
+  class Gyroscope
+  {
+    public:
+      virtual void initialize(void) = 0;
+
+      virtual int16_t getRawGyroX(void) = 0;
+			virtual int16_t getRawGyroY(void) = 0;
+			virtual int16_t getRawGyroZ(void) = 0;
+
+      double getGyroX(void);
+			double getGyroY(void);
+			double getGyroZ(void);
+
+      int16_t getGyroXOffset(void);
+			void setGyroXOffset(int16_t offset);
+			int16_t getGyroYOffset(void);
+			void setGyroYOffset(int16_t offset);
+			int16_t getGyroZOffset(void);
+			void setGyroZOffset(int16_t offset);
+
+      void setGyroOffsets(int16_t x, int16_t y, int16_t z);
+      void calcGyroOffsets(bool console, unsigned int interations = 3000);
+
+      virtual bool setGyroSensitivity(uint8_t setting) = 0;
+
+    protected:
+      int16_t gyroXOffset;
+			int16_t gyroYOffset;
+			int16_t gyroZOffset;
+
+      double gyroSensitivity;
+  };
+}
+
+#endif
