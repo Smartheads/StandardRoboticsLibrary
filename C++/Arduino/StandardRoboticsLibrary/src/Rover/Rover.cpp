@@ -158,11 +158,3 @@ double SRL::Rover::getY(void)
 {
 	return y;
 }
-
-void SRL::Rover::calcGyroOffsets(bool console, unsigned int sampleSize)
-{
-	if (mpu != NULL)
-	{
-		mpu->calcGyroOffsets(console, sampleSize);
-	}
-}

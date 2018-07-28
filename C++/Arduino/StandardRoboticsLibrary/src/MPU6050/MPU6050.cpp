@@ -133,43 +133,6 @@ bool SRL::MPU6050::setGyroSensitivity(uint8_t setting)
 	return writeBits(MPU6050_GYRO_CONFIG, MPU6050_GYRO_CONFIG_FS_SEL_BIT, MPU6050_GYRO_CONFIG_FS_SEL_LENGTH, setting);
 }
 
-/**
-*	Calculate MPU6050 gyroscope offsets.
-*
-*	@param console Boolean print data to console.
-*	@param iterations The sample size used in the calculation. Default value: 3000
-*/
-void SRL::MPU6050::calcGyroOffsets(bool console, unsigned int iterations)
-{
-	int16_t gyro[] = {0, 0, 0};
-
-	if (console)
-	{
-		Serial.println("Calculating gyro offsets...");
-	}
-
-	for (int i = 0; i < iterations; i++)
-	{
-		gyro[0] += getRawGyroX();
-		gyro[1] += getRawGyroY();
-		gyro[2] += getRawGyroZ();
-	}
-
-	setGyroOffsets(gyro[0] / iterations, gyro[1] / iterations, gyro[2] / iterations);
-
-	if (console)
-	{
-		Serial.print("Your gyro offsets are: ");
-		Serial.print(getGyroXOffset()); Serial.print(" ");
-		Serial.print(getGyroYOffset()); Serial.print(" ");
-		Serial.println(getGyroZOffset());
-		Serial.println("The gyro readings should be 0 0 0. They are: ");
-		Serial.print(getRawGyroX()); Serial.print(" ");
-		Serial.print(getRawGyroY()); Serial.print(" ");
-		Serial.println(getRawGyroZ());
-	}
-}
-
 int16_t SRL::MPU6050::getRawAccelX(void)
 {
 	return readInt16_t(MPU6050_ACCELX_DATA);
@@ -205,36 +168,6 @@ int16_t SRL::MPU6050::getRawTemp(void)
 	return readInt16_t(MPU6050_TEMP_DATA);
 }
 
-double SRL::MPU6050::getAccelX(void)
-{
-	return (getRawAccelX() - accelXOffset) / accelSensitivity;
-}
-
-double SRL::MPU6050::getAccelY(void)
-{
-	return (getRawAccelY() - accelYOffset) / accelSensitivity;
-}
-
-double SRL::MPU6050::getAccelZ(void)
-{
-	return (getRawAccelZ() - accelZOffset) / accelSensitivity;
-}
-
-double SRL::MPU6050::getGyroX(void)
-{
-	return (getRawGyroX() - gyroXOffset) / gyroSensitivity;
-}
-
-double SRL::MPU6050::getGyroY(void)
-{
-	return (getRawGyroY() - gyroYOffset) / gyroSensitivity;
-}
-
-double SRL::MPU6050::getGyroZ(void)
-{
-	return (getRawGyroZ() - gyroXOffset) / gyroSensitivity;
-}
-
 double SRL::MPU6050::getTemp(void)
 {
 	return (getRawTemp() + MPU6050_TEMP_BIAS) / MPU6050_TEMP_DIVISOR;
@@ -258,92 +191,4 @@ float SRL::MPU6050::getGyroCoeff(void)
 void SRL::MPU6050::setGyroCoeff(float gC)
 {
 	this->gC = gC;
-}
-
-int16_t SRL::MPU6050::getAccelXOffset(void)
-{
-	return accelXOffset;
-}
-
-void SRL::MPU6050::setAccelXOffset(int16_t offset)
-{
-	this->accelXOffset = offset;
-}
-
-int16_t SRL::MPU6050::getAccelYOffset(void)
-{
-	return accelYOffset;
-}
-
-void SRL::MPU6050::setAccelYOffset(int16_t offset)
-{
-	this->accelYOffset = offset;
-}
-
-int16_t SRL::MPU6050::getAccelZOffset(void)
-{
-	return accelZOffset;
-}
-
-void SRL::MPU6050::setAccelZOffset(int16_t offset)
-{
-	this->accelZOffset = offset;
-}
-
-int16_t SRL::MPU6050::getGyroXOffset(void)
-{
-	return gyroXOffset;
-}
-
-void SRL::MPU6050::setGyroXOffset(int16_t offset)
-{
-	this->gyroXOffset = offset;
-}
-
-int16_t SRL::MPU6050::getGyroYOffset(void)
-{
-	return gyroYOffset;
-}
-
-void SRL::MPU6050::setGyroYOffset(int16_t offset)
-{
-	this->gyroYOffset = offset;
-}
-
-int16_t SRL::MPU6050::getGyroZOffset(void)
-{
-	return gyroZOffset;
-}
-
-void SRL::MPU6050::setGyroZOffset(int16_t offset)
-{
-	this->gyroZOffset = offset;
-}
-
-/**
-*	Set the MPU6050's accelerometer offsets.
-*
-*	@param x The x-axis's offset.
-*	@param y The y-axis's offset.
-*	@param z The z-axis's offset.
-*/
-void SRL::MPU6050::setAccelOffsets(int16_t x, int16_t y, int16_t z)
-{
-	setAccelXOffset(x);
-	setAccelYOffset(y);
-	setAccelZOffset(z);
-}
-
-/**
-*	Set the MPU6050's gyroscope offsets.
-*
-*	@param x The x-axis's offset.
-*	@param y The y-axis's offset.
-*	@param z The z-axis's offset.
-*/
-void SRL::MPU6050::setGyroOffsets(int16_t x, int16_t y, int16_t z)
-{
-	setGyroXOffset(x);
-	setGyroYOffset(y);
-	setGyroZOffset(z);
 }

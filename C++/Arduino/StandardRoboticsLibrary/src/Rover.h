@@ -58,9 +58,6 @@ namespace SRL
 			double getX(void);
 			double getY(void);
 
-			/* Other */
-			void calcGyroOffsets(bool console = false, unsigned int sampleSize = 3000);
-
 			/* Enums */
 			enum consts
 			{

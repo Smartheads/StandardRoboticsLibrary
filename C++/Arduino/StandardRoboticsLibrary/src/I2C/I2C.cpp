@@ -66,48 +66,6 @@ bool SRL::I2CDevice::writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint8_t
 }
 
 /**
-* Write a byte to the I2C device.
-*
-*	@param reg The register to write to.
-* @param data The byte to write.
-*
-* @return
-*	Returns true if the data was sucessfully sent.
-*/
-bool SRL::I2CDevice::writeByte(uint8_t reg, byte data)
-{
-	return writeBytes(reg, 1, &data);
-}
-
-/**
-*	Overwrite specific bits of a byte in the I2C device.
-* Indexing: 7654 3210
-*
-* @param reg The register to write to.
-* @param startBit The first bit's index which will be overwritten.
-* @param len The length of the bit sequence which will be overwritten.
-* @param data The byte who's bits will be copied.
-*
-* @return
-*	Returns true if the data was sucessfully overwritten.
-*/
-bool SRL::I2CDevice::writeBits(uint8_t reg, uint8_t startBit, uint8_t len, byte data)
-{
-	byte b = readByte(reg);
-
-	byte mask = ((1 << len) - 1) << (startBit - len + 1);
-	data <<= (startBit - len + 1);
-	data &= mask;
-	b &= ~(mask);
-	b |= data;
-
-	bool s = writeByte(reg, b);
-	Wire.endTransmission();
-
-	return s;
-}
-
-/**
 *	Read bytes from the I2C device.
 *
 *	@param reg The register to read from.
@@ -127,43 +85,4 @@ void SRL::I2CDevice::readBytes(uint8_t reg, byte* buff, uint8_t len)
 	}
 
 	Wire.endTransmission();
-}
-
-/**
-*	Reads a byte from the I2C device.
-*
-*	@param reg The register to read from.
-*
-*	@return
-* Returns the byte read.
-*/
-byte SRL::I2CDevice::readByte(uint8_t reg)
-{
-	byte b;
-	readBytes(reg, &b, 1);
-
-	return b;
-}
-
-/**
-*	Read two bytes from the I2C device.
-*
-*	@param reg The register to read from.
-*
-*	@return
-*	Retuns the 2 bytes in int16_t form.
-*/
-int16_t SRL::I2CDevice::readInt16_t(uint8_t reg)
-{
-	return ((int16_t) readByte(reg)) << 8 | readByte(++reg);
-}
-
-uint8_t SRL::I2CDevice::getAddress(void)
-{
-	return address;
-}
-
-void SRL::I2CDevice::setAddress(uint8_t address)
-{
-	this->address = address;
 }

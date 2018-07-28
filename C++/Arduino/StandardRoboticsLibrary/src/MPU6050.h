@@ -26,6 +26,8 @@
 
 #include <SRL.h>
 #include <I2C.h>
+#include <Accelerometer.h>
+#include <Gyroscope.h>
 
 #define MPU6050_ADDR         0x68
 #define MPU6050_SMPLRT_DIV   0x19
@@ -70,37 +72,22 @@ namespace SRL
 	*	Class MPU6050. A class for communicating with the MPU6050 accelerometer
 	* and gyroscope.
 	*/
-	class MPU6050: public SRL::I2CDevice
+	class MPU6050: public SRL::I2CDevice, SRL::Accelerometer, SRL::Gyroscope
 	{
 		public:
 			MPU6050(uint8_t address, float aC = 0.02f, float gC = 0.98f);
-
 			void initialize(void);
-
-			bool setAccelSensitivity(uint8_t setting);
-			bool setGyroSensitivity(uint8_t setting);
-
-			void calcGyroOffsets(bool console, unsigned int interations = 3000);
 
 			/* Read data from device */
 			int16_t getRawAccelX(void);
-			int16_t getRawAccelY(void);
-			int16_t getRawAccelZ(void);
+      int16_t getRawAccelY(void);
+      int16_t getRawAccelZ(void);
 
 			int16_t getRawGyroX(void);
 			int16_t getRawGyroY(void);
 			int16_t getRawGyroZ(void);
 
 			int16_t getRawTemp(void);
-
-			double getAccelX(void);
-			double getAccelY(void);
-			double getAccelZ(void);
-
-			double getGyroX(void);
-			double getGyroY(void);
-			double getGyroZ(void);
-
 			double getTemp(void);
 
 			/* Getters and setters */
@@ -109,36 +96,12 @@ namespace SRL
 			float getGyroCoeff(void);
 			void setGyroCoeff(float gC);
 
-			int16_t getAccelXOffset(void);
-			void setAccelXOffset(int16_t offset);
-			int16_t getAccelYOffset(void);
-			void setAccelYOffset(int16_t offset);
-			int16_t getAccelZOffset(void);
-			void setAccelZOffset(int16_t offset);
-			int16_t getGyroXOffset(void);
-			void setGyroXOffset(int16_t offset);
-			int16_t getGyroYOffset(void);
-			void setGyroYOffset(int16_t offset);
-			int16_t getGyroZOffset(void);
-			void setGyroZOffset(int16_t offset);
-
-			void setAccelOffsets(int16_t x, int16_t y, int16_t z);
-			void setGyroOffsets(int16_t x, int16_t y, int16_t z);
+			bool setAccelSensitivity(uint8_t setting);
+			bool setGyroSensitivity(uint8_t setting);
 
 		private:
 			float aC;
 			float gC;
-
-			double accelSensitivity;
-			double gyroSensitivity;
-
-			int16_t accelXOffset;
-			int16_t accelYOffset;
-			int16_t accelZOffset;
-
-			int16_t gyroXOffset;
-			int16_t gyroYOffset;
-			int16_t gyroZOffset;
 	};
 }
 

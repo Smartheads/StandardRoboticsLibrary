@@ -26,6 +26,7 @@
 
 #include <SRL.h>
 #include <Wire.h>
+#include <CommProtocol.h>
 
 namespace SRL
 {
@@ -34,24 +35,13 @@ namespace SRL
 	* Uses Wire.h
 	* Includes methods to read and write data to the I2C device.
 	*/
-	class I2CDevice
+	class I2CDevice: public SRL::CommProtocol
 	{
 		public:
-		I2CDevice(uint8_t address);
+			I2CDevice(uint8_t address);
 
-		bool writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint8_t start = 0);
-		bool writeByte(uint8_t reg, byte data);
-		bool writeBits(uint8_t reg, uint8_t startBit, uint8_t len, byte data);
-
-		void readBytes(uint8_t reg, byte* buff, uint8_t len);
-		byte readByte(uint8_t reg);
-		int16_t readInt16_t(uint8_t reg);
-
-		uint8_t getAddress(void);
-		void setAddress(uint8_t address);
-
-		private:
-		uint8_t address;
+			bool writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint8_t start = 0);
+			void readBytes(uint8_t reg, byte* buff, uint8_t len);
 	};
 }
 
