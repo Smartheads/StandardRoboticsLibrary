@@ -57,9 +57,9 @@
 #define MPU6050_16G_ACCEL_SENSITIVITY 2048
 
 #define MPU6050_250DS_GYRO_SENSITIVITY 131
-#define MPU6050_500DS_GYRO_SENSITIVITY 65.5f
-#define MPU6050_1000DS_GYRO_SENSITIVITY 32.8f
-#define MPU6050_2000DS_GYRO_SENSITIVITY 16.4f
+#define MPU6050_500DS_GYRO_SENSITIVITY 65.5
+#define MPU6050_1000DS_GYRO_SENSITIVITY 32.8
+#define MPU6050_2000DS_GYRO_SENSITIVITY 16.4
 
 #define MPU6050_TEMP_BIAS 12412
 #define MPU6050_TEMP_DIVISOR 340
@@ -79,6 +79,8 @@ namespace SRL
 
 			bool setAccelSensitivity(uint8_t setting);
 			bool setGyroSensitivity(uint8_t setting);
+
+			void calcGyroOffsets(bool console, unsigned int interations = 3000);
 
 			/* Read data from device */
 			int16_t getRawAccelX(void);
@@ -127,8 +129,8 @@ namespace SRL
 			float aC;
 			float gC;
 
-			uint8_t accelSensitivity;
-			float gyroSensitivity;
+			double accelSensitivity;
+			double gyroSensitivity;
 
 			int16_t accelXOffset;
 			int16_t accelYOffset;

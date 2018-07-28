@@ -133,6 +133,43 @@ bool SRL::MPU6050::setGyroSensitivity(uint8_t setting)
 	return writeBits(MPU6050_GYRO_CONFIG, MPU6050_GYRO_CONFIG_FS_SEL_BIT, MPU6050_GYRO_CONFIG_FS_SEL_LENGTH, setting);
 }
 
+/**
+*	Calculate MPU6050 gyroscope offsets.
+*
+*	@param console Boolean print data to console.
+*	@param iterations The sample size used in the calculation. Default value: 3000
+*/
+void SRL::MPU6050::calcGyroOffsets(bool console, unsigned int iterations)
+{
+	int16_t gyro[] = {0, 0, 0};
+
+	if (console)
+	{
+		Serial.println("Calculating gyro offsets...");
+	}
+
+	for (int i = 0; i < iterations; i++)
+	{
+		gyro[0] += getRawGyroX();
+		gyro[1] += getRawGyroY();
+		gyro[2] += getRawGyroZ();
+	}
+
+	setGyroOffsets(gyro[0] / iterations, gyro[1] / iterations, gyro[2] / iterations);
+
+	if (console)
+	{
+		Serial.print("Your gyro offsets are: ");
+		Serial.print(getGyroXOffset()); Serial.print(" ");
+		Serial.print(getGyroYOffset()); Serial.print(" ");
+		Serial.println(getGyroZOffset());
+		Serial.println("The gyro readings should be 0 0 0. They are: ");
+		Serial.print(getRawGyroX()); Serial.print(" ");
+		Serial.print(getRawGyroY()); Serial.print(" ");
+		Serial.println(getRawGyroZ());
+	}
+}
+
 int16_t SRL::MPU6050::getRawAccelX(void)
 {
 	return readInt16_t(MPU6050_ACCELX_DATA);
