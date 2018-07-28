@@ -23,38 +23,30 @@
 */
 #include <Rover.h>
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction)
+SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction): Tank(leftMotor, rightMotor)
 {
-	this->leftMotor = leftMotor;
-	this->rightMotor = rightMotor;
 	this->x = x;
 	this->y = y;
 	this->direction = SRL::Angle(direction);
 }
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, double x, double y, float direction)
+SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, double x, double y, float direction): Tank(leftMotor, rightMotor)
 {
-	this->leftMotor = leftMotor;
-	this->rightMotor = rightMotor;
 	this->leftSonar = leftSonar;
 	this->rightSonar = rightSonar;
 	this->direction = SRL::Angle(direction);
 }
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, MPU6050* mpu, double x, double y, float direction)
+SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, MPU6050* mpu, double x, double y, float direction): Tank(leftMotor, rightMotor)
 {
-	this->leftMotor = leftMotor;
-	this->rightMotor = rightMotor;
 	this->leftSonar = leftSonar;
 	this->rightSonar = rightSonar;
 	this->mpu = mpu;
 	this->direction = SRL::Angle(direction);
 }
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, Encoder* leftEncoder, Encoder* rightEncoder, MPU6050* mpu, double x, double y, float direction)
+SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, Encoder* leftEncoder, Encoder* rightEncoder, MPU6050* mpu, double x, double y, float direction): Tank(leftMotor, rightMotor)
 {
-	this->leftMotor = leftMotor;
-	this->rightMotor = rightMotor;
 	this->leftSonar = leftSonar;
 	this->rightSonar = rightSonar;
 	this->mpu = mpu;
@@ -63,27 +55,27 @@ SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * lef
 	this->leftEncoder = leftEncoder;
 }
 
-void SRL::Rover::init(void)
+void SRL::Rover::initialize(void)
 {
 	if (mpu != NULL)
 	{
-		mpu->begin();
+		mpu->initialize();
 	}
 }
 
 void SRL::Rover::updateDirection(void)
 {
-	
+
 }
 
 void SRL::Rover::updatePosition(void)
 {
-	mpu->interruptUpdate(GYROSCOPE_INTERVAL);
-	direction.setAngle(mpu->getAngleX());
-	
+	//mpu->interruptUpdate(GYROSCOPE_INTERVAL);
+	//direction.setAngle(mpu->getAngleX());
+
 	if(movingStraight)
 	{
-		
+
 	}
 }
 
@@ -113,13 +105,10 @@ void SRL::Rover::forward(double distance)
 	SRL::Vector g(direction, distance);
 	xGoal = g.getX() + x;
 	yGoal = g.getY() + y;
-	
-	leftMotor->forwards();
-	rightMotor->forwards();
-	
-	leftMotor->start();
-	rightMotor->start();
-	
+
+	forwards();
+	start();
+
 	movingStraight = true;
 }
 
@@ -128,39 +117,30 @@ void SRL::Rover::backward(double distance)
 	SRL::Vector g(direction, distance * -1);
 	xGoal = g.getX() + x;
 	yGoal = g.getY() + y;
-	
-	leftMotor->backwards();
-	rightMotor->backwards();
-	
-	leftMotor->start();
-	rightMotor->start();
-	
+
+	backwards();
+	start();
+
 	movingStraight = true;
 }
 
 void SRL::Rover::turnRight(double amount)
 {
 	turnGoal =  SRL::Angle(direction.getSize() + amount);
-	
-	leftMotor->forwards();
-	rightMotor->backwards();
-	
-	leftMotor->start();
-	rightMotor->start();
-	
+
+	faceRight();
+	start();
+
 	turning = true;
 }
 
 void SRL::Rover::turnLeft(double amount)
 {
 	turnGoal =  SRL::Angle(direction.getSize() + amount * -1);
-	
-	leftMotor->backwards();
-	rightMotor->forwards();
-	
-	leftMotor->start();
-	rightMotor->start();
-	
+
+	faceLeft();
+	start();
+
 	turning = true;
 }
 

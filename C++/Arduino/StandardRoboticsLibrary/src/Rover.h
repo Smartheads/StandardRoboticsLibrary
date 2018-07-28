@@ -26,16 +26,16 @@
 
 #include <SRL.h>
 #include <NewPing.h>
-#include <MPU6050_tockn.h>
-#include <DueTimer.h>
+#include <MPU6050.h>
 #include <Encoder.h>
 #include <Angle.h>
 #include <Vector.h>
 #include <Motor.h>
+#include <Tank.h>
 
 namespace SRL
 {
-	class Rover
+	class Rover: public Tank
 	{
 		public:
 			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, double x = 0.0, double y = 0.0, float direction = 0.0f);
@@ -43,7 +43,7 @@ namespace SRL
 			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, NewPing* leftSonar, NewPing* rightSonar, MPU6050* mpu, double x = 0.0, double y = 0.0, float direction = 0.0f);
 			Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, Encoder* leftEncoder, Encoder* rightEncoder, MPU6050* mpu, double x = 0.0, double y = 0.0, float direction = 0.0f);
 
-			void init(void);
+			void initialize(void);
 
 			/* Movement commands */
 			void forward(double distance = 35.0f);
@@ -60,7 +60,7 @@ namespace SRL
 
 			/* Other */
 			void calcGyroOffsets(bool console = false, unsigned int sampleSize = 3000);
-			
+
 			/* Enums */
 			enum consts
 			{
@@ -69,8 +69,6 @@ namespace SRL
 			};
 
 		private:
-			SRL::Motor* leftMotor;
-			SRL::Motor* rightMotor;
 			Encoder* leftEncoder;
 			Encoder* rightEncoder;
 			NewPing* leftSonar;
@@ -83,10 +81,10 @@ namespace SRL
 
 			void updateDirection(void);
 			void updatePosition(void);
-			
+
 			bool turning = false;
 			SRL::Angle turnGoal;
-			
+
 			bool movingStraight = false;
 			double xGoal, yGoal;
 	};

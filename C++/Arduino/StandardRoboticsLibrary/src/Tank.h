@@ -21,51 +21,53 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _MOTOR_h
-#define _MOTOR_h
+#ifndef _TANK_H
+#define _TANK_H
 
 #include <SRL.h>
+#include <Motor.h>
 
 namespace SRL
 {
-	class Motor
-	{
-	public:
-		/* Constructors */
-		Motor(unsigned int forwardPin, unsigned int backwardPin, unsigned int pwmPin);
+  /**
+  * Class Tank. Defines a tank according to SCSRLG/TG1204.
+  * Includes functions for the control of 2 motors next to eachother.
+  */
+  class Tank
+  {
+    public:
+      Tank(SRL::Motor* leftMotor, SRL::Motor* rightMotor);
 
-		/* Movement commands */
-		void start(void);
-		void stop(void);
+      /* Movement commands */
+      void start(void);
+      void stop(void);
+      void faceRight(void);
+      void faceLeft(void);
 
-		void setDirection(unsigned int state);
-		void forwards(void);
-		void backwards(void);
+      void setDirection(unsigned int state);
+      void forwards(void);
+      void backwards(void);
 
-		/* Enums */
-		enum States
-		{
-			FORWARD = 1,
-			BACKWARD = 2
-		};
+      /* Enums */
+      enum States
+      {
+        FORWARD = 1,
+        BACKWARD = 2,
+        LEFT = 3,
+        RIGHT = 4
+      };
 
-		/* Getters & setters */
-		unsigned int getForwardPin(void);
-		unsigned int getBackwardPin(void);
-		unsigned int getPwmPin(void);
-		float getSpeed(void);
+      /* Getters & setters */
+      unsigned int getDirection(void);
 
-		void setSpeed(float speed);
-		unsigned int getDirection(void);
+    protected:
+      SRL::Motor* leftMotor;
+      SRL::Motor* rightMotor;
 
-	private:
-		unsigned int forwardPin;
-		unsigned int backwardPin;
-		unsigned int pwmPin;
+    private:
+      unsigned int direction;
 
-		float speed;
-		unsigned int direction;
-		bool moving;
-	};
+  };
 }
+
 #endif
