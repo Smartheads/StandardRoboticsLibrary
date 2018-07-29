@@ -25,23 +25,20 @@
 #define _ROVER_h
 
 #include <SRL.h>
-#include <NewPing.h>
-#include <MPU6050.h>
-#include <Encoder.h>
 #include <Angle.h>
 #include <Vector.h>
-#include <Motor.h>
 #include <Tank.h>
+#include <Component.h>
+#include <cstdarg>
+#include <vector>
 
 namespace SRL
 {
 	class Rover: public Tank
 	{
 		public:
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, double x = 0.0, double y = 0.0, float direction = 0.0f);
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, NewPing* leftSonar, NewPing* rightSonar, double x = 0.0, double y = 0.0, float direction = 0.0f);
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, NewPing* leftSonar, NewPing* rightSonar, MPU6050* mpu, double x = 0.0, double y = 0.0, float direction = 0.0f);
-			Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, Encoder* leftEncoder, Encoder* rightEncoder, MPU6050* mpu, double x = 0.0, double y = 0.0, float direction = 0.0f);
+			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor,
+				 double x = 0.0, double y = 0.0, float direction = 0.0f, unsigned int argc = 0, ...);
 
 			void initialize(void);
 
@@ -57,6 +54,8 @@ namespace SRL
 			float getDirection(void);
 			double getX(void);
 			double getY(void);
+			void setX(double x);
+			void setY(double y);
 
 			/* Enums */
 			enum consts
@@ -66,24 +65,19 @@ namespace SRL
 			};
 
 		private:
-			Encoder* leftEncoder;
-			Encoder* rightEncoder;
-			NewPing* leftSonar;
-			NewPing* rightSonar;
-			MPU6050* mpu;
-
 			double x;
 			double y;
 			SRL::Angle direction;
-
-			void updateDirection(void);
-			void updatePosition(void);
+			std::vector<SRL::Component*> components;
 
 			bool turning = false;
 			SRL::Angle turnGoal;
 
 			bool movingStraight = false;
 			double xGoal, yGoal;
+
+			void updateDirection(void);
+			void updatePosition(void);
 	};
 }
 #endif
