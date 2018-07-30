@@ -21,31 +21,22 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _COMPONENT_H
-#define _COMPONENT_H
+#include <Component.h>
 
-#include <SRL.h>
+unsigned int SRL::Component::lastId = 0;
 
-namespace SRL
+SRL::Component::Component(String name)
 {
-  class Component
-  {
-    public:
-      Component(String name);
-
-      void initialize(void);
-
-      /* Getters & setters: */
-      unsigned int getId(void);
-      String getName(void);
-
-      /* Static variables */
-      static unsigned int lastId;
-
-    protected:
-      String name;
-      unsigned int id;
-  };
+  this->name = name;
+  this->id = ++Component::lastId;
 }
 
-#endif
+void SRL::Component::initialize(void)
+{
+  /* Override me */
+}
+
+String SRL::Component::getName(void)
+{
+  return name;
+}
