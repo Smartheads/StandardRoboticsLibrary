@@ -23,6 +23,11 @@
 */
 #include <Gyroscope.h>
 
+SRL::Gyroscope::Gyroscope(String name) : Component(name)
+{
+
+}
+
 /**
 *	Set the gyroscope's offsets.
 *
@@ -52,7 +57,7 @@ void SRL::Gyroscope::calcGyroOffsets(bool console, unsigned int iterations)
 		Serial.println("Calculating gyro offsets...");
 	}
 
-	for (int i = 0; i < iterations; i++)
+	for (unsigned int i = 0; i < iterations; i++)
 	{
 		gyro[0] += getRawGyroX();
 		gyro[1] += getRawGyroY();

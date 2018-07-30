@@ -28,7 +28,7 @@ unsigned int SRL::Component::lastId = 0;
 SRL::Component::Component(String name)
 {
   this->name = name;
-  this->id = ++Component::lastId;
+  this->id = ++lastId;
 }
 
 void SRL::Component::initialize(void)
@@ -39,4 +39,9 @@ void SRL::Component::initialize(void)
 String SRL::Component::getName(void)
 {
   return name;
+}
+
+unsigned int SRL::Component::getId(void)
+{
+  return id;
 }

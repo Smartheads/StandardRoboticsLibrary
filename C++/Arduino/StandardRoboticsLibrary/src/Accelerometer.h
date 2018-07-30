@@ -25,12 +25,14 @@
 #define _ACCELEROMETER_H
 
 #include <SRL.h>
+#include <Component.h>
 
 namespace SRL
 {
-  class Accelerometer
+  class Accelerometer : virtual public SRL::Component
   {
     public:
+      Accelerometer(String name);
       virtual void initialize(void) = 0;
 
       virtual int16_t getRawAccelX(void) = 0;
