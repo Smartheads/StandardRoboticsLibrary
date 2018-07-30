@@ -64,7 +64,7 @@ void SRL::MPU6050::initialize(void)
 *	@param setting The sensitivity setting.
 *
 * @return
-* Retuns true if the setting was sucessfully updated.
+* Returns true if the setting was sucessfully updated.
 */
 bool SRL::MPU6050::setAccelSensitivity(uint8_t setting)
 {
@@ -104,7 +104,7 @@ bool SRL::MPU6050::setAccelSensitivity(uint8_t setting)
 *	@param setting The sensitivity setting.
 *
 *	@return
-*	Retuns true if the setting was sucessfully updated.
+*	Returns true if the setting was sucessfully updated.
 */
 bool SRL::MPU6050::setGyroSensitivity(uint8_t setting)
 {
