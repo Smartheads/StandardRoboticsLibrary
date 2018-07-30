@@ -24,7 +24,7 @@
 #include <I2C.h>
 
 /**
-*	Constructor of I2C device.
+*	Constructor of the I2C device.
 *
 * @param address The address of the I2C device.
 */

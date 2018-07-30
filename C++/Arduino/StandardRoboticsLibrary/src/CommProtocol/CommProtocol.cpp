@@ -87,11 +87,14 @@ byte SRL::CommProtocol::readByte(uint8_t reg)
 *	@param reg The register to read from.
 *
 *	@return
-*	Retuns the 2 bytes in int16_t form.
+*	Returns the 2 bytes in int16_t form.
 */
 int16_t SRL::CommProtocol::readInt16_t(uint8_t reg)
 {
-	return ((int16_t) readByte(reg)) << 8 | readByte(++reg);
+	int16_t a = (int16_t) readByte(reg);
+	reg++;
+
+	return a << 8 | readByte(++reg);
 }
 
 uint8_t SRL::CommProtocol::getAddress(void)
