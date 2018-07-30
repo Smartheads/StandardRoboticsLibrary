@@ -25,11 +25,10 @@
 #define _GYROSCOPE_H
 
 #include <SRL.h>
-#include <Component.h>
 
 namespace SRL
 {
-  class Gyroscope: public SRL::Component
+  class Gyroscope
   {
     public:
       virtual void initialize(void) = 0;
