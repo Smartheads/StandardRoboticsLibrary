@@ -21,20 +21,41 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef SRL_LIB_H
+#include <SRF05.h>
 
-#define SRL_LIB_H
-
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
-#else
-#include "WProgram.h"
-#endif
-
-namespace SRL
+SRL::SRF05::SRF05(uint8_t triggerPin, uint8_t echoPin, double maxDistanceCm): Sonar(triggerPin, echoPin, convertUs(maxDistanceCm)), Component(name)
 {
-	const unsigned int PWM_MAX_VALUE = 255;
-	const unsigned int PWM_MIN_VALUE = 0;
+
 }
 
-#endif // !SRL_LIB_H
+unsigned long SRL::SRF05::ping(void)
+{
+  pingTrigger();
+  unsigned long reading = pulseIn(echoPin, HIGH);
+
+  if (reading == 0 || reading > maxDistance)
+  {
+    return NO_ECHO;
+  }
+
+  return reading - PING_OVERHEAD;
+}
+
+void SRL::SRF05::pingTrigger(void)
+{
+  digitalWrite(triggerPin, LOW);
+  delayMicroseconds(4);
+  digitalWrite(triggerPin, HIGH);
+  delayMicroseconds(10);
+  digitalWrite(triggerPin, LOW);
+}
+
+double SRL::SRF05::convertCm(unsigned long us)
+{
+  return LINEAR_FUNCTION_SLOPE * us + LINEAR_FUNCTION_INTERSECT;
+}
+
+unsigned long SRL::SRF05::convertUs(double cm)
+{
+  return (cm - LINEAR_FUNCTION_INTERSECT) / LINEAR_FUNCTION_SLOPE;
+}

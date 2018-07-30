@@ -21,20 +21,33 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef SRL_LIB_H
+#ifndef _SRF05_H
+#define _SRF05_H
 
-#define SRL_LIB_H
+#include <SRL.h>
+#include <Sonar.h>
+#include <Component.h>
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
-#else
-#include "WProgram.h"
-#endif
+#define PING_OVERHEAD 5
+#define LINEAR_FUNCTION_SLOPE 0.015030304195946
+#define LINEAR_FUNCTION_INTERSECT -2.6324
 
 namespace SRL
 {
-	const unsigned int PWM_MAX_VALUE = 255;
-	const unsigned int PWM_MIN_VALUE = 0;
-}
+  class SRF05 : public Sonar, public Component
+  {
+    public:
+      SRF05(uint8_t triggerPin, uint8_t echoPin, double maxDistanceCm = 400);
 
-#endif // !SRL_LIB_H
+      unsigned long ping(void);
+
+      double convertCm(unsigned long us);
+      unsigned long convertUs(double cm);
+
+    private:
+      void pingTrigger(void);
+
+      const String name = "SRF05";
+  };
+}
+#endif

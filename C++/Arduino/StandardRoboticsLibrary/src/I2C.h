@@ -35,7 +35,7 @@ namespace SRL
 	* Uses Wire.h
 	* Includes methods to read and write data to the I2C device.
 	*/
-	class I2CDevice: public SRL::CommProtocol
+	class I2CDevice : virtual public SRL::CommProtocol
 	{
 		public:
 			I2CDevice(uint8_t address);

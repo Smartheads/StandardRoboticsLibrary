@@ -20,21 +20,29 @@
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
+* 
+* Standard Robotics Library Motor Example Sketch
+* 
+* Version: 1204
+* Date: 2018.07.29
 */
-#ifndef SRL_LIB_H
+#include <Motor.h>
+using namespace SRL;
 
-#define SRL_LIB_H
+Motor* motor;
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
-#else
-#include "WProgram.h"
-#endif
-
-namespace SRL
+void setup()
 {
-	const unsigned int PWM_MAX_VALUE = 255;
-	const unsigned int PWM_MIN_VALUE = 0;
+  motor = new Motor(24, 25, 7); // Create a new Motor object.
 }
 
-#endif // !SRL_LIB_H
+void loop()
+{
+  motor->forwards(); // Set the motor's position to forwards
+  motor->start(); // Start the motor
+  delay(3000);
+  motor->backwards(); // Set the motor's position to backwards
+  delay(3000);
+  motor->stop();  // Stop the motor
+  delay(3000);
+}

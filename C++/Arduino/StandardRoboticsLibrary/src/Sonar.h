@@ -21,20 +21,50 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef SRL_LIB_H
+#ifndef _SONAR_H
+#define _SONAR_H
 
-#define SRL_LIB_H
+#include <SRL.h>
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
-#else
-#include "WProgram.h"
-#endif
+#define NO_ECHO 0
+#define PING_MEDIAN_DELAY 29000
 
 namespace SRL
 {
-	const unsigned int PWM_MAX_VALUE = 255;
-	const unsigned int PWM_MIN_VALUE = 0;
+  class Sonar
+  {
+    public:
+      Sonar(uint8_t triggerPin, uint8_t echoPin, unsigned long maxDistanceCm = 22770);
+
+      /* Get data from sensor */
+      virtual unsigned long ping(void) = 0;
+      double pingCm(void);
+      double pingMm(void);
+      unsigned long pingMedian(unsigned int interations = 5);
+      double pingMedianCm(unsigned int interations = 5);
+      double pingMedianMm(unsigned int interations = 5);
+
+      virtual double convertCm(unsigned long us) = 0;
+      double convertMm(unsigned long us);
+      virtual unsigned long convertUs(double cm) = 0;
+
+
+      /* Getters & setters */
+      uint8_t getTriggerPin(void);
+      void setTriggerPin(uint8_t triggerPin);
+      uint8_t getEchoPin(void);
+      void setEchoPin(uint8_t echoPin);
+
+      double getMaxDistance(void);
+      void setMaxDistance(double cm);
+      void setMaxDistance(unsigned long us);
+
+    protected:
+      uint8_t triggerPin;
+      uint8_t echoPin;
+
+      unsigned long maxDistance;
+  };
 }
 
-#endif // !SRL_LIB_H
+#endif

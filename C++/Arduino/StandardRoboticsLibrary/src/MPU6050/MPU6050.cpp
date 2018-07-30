@@ -30,7 +30,7 @@
 * @param aC Complementary filter's accelerometer coefficient. Default value: 0.02
 *	@param gC Complementary filter's gyroscope coefficient. Default value: 0.98
 */
-SRL::MPU6050::MPU6050(uint8_t address, float aC, float gC) : I2CDevice(address)
+SRL::MPU6050::MPU6050(uint8_t address, float aC, float gC) : I2CDevice(address), Component(name)
 {
 	this->aC = aC;
 	this->gC = gC;

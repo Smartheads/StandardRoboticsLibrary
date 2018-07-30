@@ -25,23 +25,27 @@
 #define _ROVER_h
 
 #include <SRL.h>
-#include <NewPing.h>
-#include <MPU6050.h>
-#include <Encoder.h>
 #include <Angle.h>
 #include <Vector.h>
-#include <Motor.h>
 #include <Tank.h>
+#include <Component.h>
+#include <stdarg.h>
+#include <vector>
 
 namespace SRL
 {
-	class Rover: public Tank
+	class Rover : protected Tank
 	{
 		public:
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, double x = 0.0, double y = 0.0, float direction = 0.0f);
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, NewPing* leftSonar, NewPing* rightSonar, double x = 0.0, double y = 0.0, float direction = 0.0f);
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, NewPing* leftSonar, NewPing* rightSonar, MPU6050* mpu, double x = 0.0, double y = 0.0, float direction = 0.0f);
-			Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, Encoder* leftEncoder, Encoder* rightEncoder, MPU6050* mpu, double x = 0.0, double y = 0.0, float direction = 0.0f);
+			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor,
+				 double x = 0.0, double y = 0.0, float direction = 0.0f);
+
+			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor,
+				 double x, double y, float direction, unsigned int argc, ...);
+
+			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, unsigned int argc, ...);
+
+			~Rover(void);
 
 			void initialize(void);
 
@@ -52,11 +56,15 @@ namespace SRL
 			void turnLeft(double amount = 90.0f);
 			void goTo(double x, double y);
 			void turnTo(SRL::Angle dir);
+			void stop(void);
 
 			/* Getters & setters */
 			float getDirection(void);
+			void setDirection(float direction);
 			double getX(void);
 			double getY(void);
+			void setX(double x);
+			void setY(double y);
 
 			/* Enums */
 			enum consts
@@ -65,20 +73,15 @@ namespace SRL
 				UPDATE_POSITION_INTERAL = 500
 			};
 
-		private:
-			Encoder* leftEncoder;
-			Encoder* rightEncoder;
-			NewPing* leftSonar;
-			NewPing* rightSonar;
-			MPU6050* mpu;
-
-			double x;
-			double y;
-			SRL::Angle direction;
-
+		protected:
 			void updateDirection(void);
 			void updatePosition(void);
 
+			double x, y;
+			SRL::Angle direction;
+			std::vector<SRL::Component*> components;
+
+		private:
 			bool turning = false;
 			SRL::Angle turnGoal;
 

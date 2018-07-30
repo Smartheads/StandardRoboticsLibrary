@@ -21,20 +21,22 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef SRL_LIB_H
+#include <Component.h>
 
-#define SRL_LIB_H
+unsigned int SRL::Component::lastId = 0;
 
-#if defined(ARDUINO) && ARDUINO >= 100
-#include "arduino.h"
-#else
-#include "WProgram.h"
-#endif
-
-namespace SRL
+SRL::Component::Component(String name)
 {
-	const unsigned int PWM_MAX_VALUE = 255;
-	const unsigned int PWM_MIN_VALUE = 0;
+  this->name = name;
+  this->id = ++Component::lastId;
 }
 
-#endif // !SRL_LIB_H
+void SRL::Component::initialize(void)
+{
+  /* Override me */
+}
+
+String SRL::Component::getName(void)
+{
+  return name;
+}

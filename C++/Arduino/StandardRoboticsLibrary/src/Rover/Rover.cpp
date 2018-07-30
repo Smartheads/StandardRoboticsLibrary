@@ -23,43 +23,57 @@
 */
 #include <Rover.h>
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction): Tank(leftMotor, rightMotor)
+SRL::Rover::Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, double x, double y, float direction): Tank(leftMotor, rightMotor)
 {
 	this->x = x;
 	this->y = y;
 	this->direction = SRL::Angle(direction);
 }
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, double x, double y, float direction): Tank(leftMotor, rightMotor)
+SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction, unsigned int argc, ...): Rover(leftMotor, rightMotor, x, y, direction)
 {
-	this->leftSonar = leftSonar;
-	this->rightSonar = rightSonar;
-	this->direction = SRL::Angle(direction);
+	va_list components;
+	va_start(components, argc);
+
+	for (int i = 0; i < argc; i++)
+	{
+		this->components.push_back(va_arg(components, SRL::Component*));
+	}
+
+	va_end(components);
 }
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, MPU6050* mpu, double x, double y, float direction): Tank(leftMotor, rightMotor)
+SRL::Rover::Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, unsigned int argc, ...): Rover(leftMotor, rightMotor)
 {
-	this->leftSonar = leftSonar;
-	this->rightSonar = rightSonar;
-	this->mpu = mpu;
-	this->direction = SRL::Angle(direction);
+	va_list components;
+	va_start(components, argc);
+
+	for (int i = 0; i < argc; i++)
+	{
+		this->components.push_back(va_arg(components, SRL::Component*));
+		Serial.println(this->components.back()->getName());
+	}
+
+	va_end(components);
 }
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, NewPing * leftSonar, NewPing * rightSonar, Encoder* leftEncoder, Encoder* rightEncoder, MPU6050* mpu, double x, double y, float direction): Tank(leftMotor, rightMotor)
+SRL::Rover::~Rover(void)
 {
-	this->leftSonar = leftSonar;
-	this->rightSonar = rightSonar;
-	this->mpu = mpu;
-	this->direction = SRL::Angle(direction);
-	this->rightEncoder = rightEncoder;
-	this->leftEncoder = leftEncoder;
+	delete leftMotor;
+	delete rightMotor;
+
+	for (Component* c : components)
+	{
+		delete c;
+	}
 }
 
 void SRL::Rover::initialize(void)
 {
-	if (mpu != NULL)
+	/* initialize all components */
+	for (Component* c : components)
 	{
-		mpu->initialize();
+		c->initialize();
 	}
 }
 
@@ -144,9 +158,19 @@ void SRL::Rover::turnLeft(double amount)
 	turning = true;
 }
 
+void SRL::Rover::stop(void)
+{
+	Tank::stop();
+}
+
 float SRL::Rover::getDirection(void)
 {
 	return direction.getSize();
+}
+
+void SRL::Rover::setDirection(float direction)
+{
+	this->direction = SRL::Angle(direction);
 }
 
 double SRL::Rover::getX(void)
@@ -154,7 +178,17 @@ double SRL::Rover::getX(void)
 	return x;
 }
 
+void SRL::Rover::setX(double x)
+{
+	this->x = x;
+}
+
 double SRL::Rover::getY(void)
 {
 	return y;
+}
+
+void SRL::Rover::setY(double y)
+{
+	this->y = y;
 }

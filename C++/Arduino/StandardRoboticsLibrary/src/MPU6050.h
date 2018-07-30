@@ -28,6 +28,7 @@
 #include <I2C.h>
 #include <Accelerometer.h>
 #include <Gyroscope.h>
+#include <Component.h>
 
 #define MPU6050_ADDR         0x68
 #define MPU6050_SMPLRT_DIV   0x19
@@ -72,7 +73,7 @@ namespace SRL
 	*	Class MPU6050. A class for communicating with the MPU6050 accelerometer
 	* and gyroscope.
 	*/
-	class MPU6050: public SRL::I2CDevice, SRL::Accelerometer, SRL::Gyroscope
+	class MPU6050 : public SRL::I2CDevice, public SRL::Accelerometer, public SRL::Gyroscope, public SRL::Component
 	{
 		public:
 			MPU6050(uint8_t address, float aC = 0.02f, float gC = 0.98f);
@@ -102,6 +103,8 @@ namespace SRL
 		private:
 			float aC;
 			float gC;
+
+			const String name = "MPU6050";
 	};
 }
 

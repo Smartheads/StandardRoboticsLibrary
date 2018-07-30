@@ -32,14 +32,14 @@ setX	KEYWORD2
 setY	KEYWORD2
 
 Rover	KEYWORD1
-forward	KEYWORD2
-backwards	KEYWORD2
-turnRight	KEYWORD2
-turnLeft	KEYWORD2
+forward KEYWORD2
+backward  KEYWORD2
+turnRight KEYWORD2
+turnLeft  KEYWORD2
 getDirection	KEYWORD2
 getX	KEYWORD2
 getY	KEYWORD2
-calcGyroOffsets	KEYWORD2
+calcGyroOffsets KEYWORD2
 GYROSCOPE_INTERVAL	LITERAL1
 UPDATE_POSITION_INTERVAL	LITERAL1
 
@@ -88,3 +88,34 @@ setGyroZOffset  KEYWORD2
 setAccelOffsets KEYWORD2
 setGyroOffsets  KEYWORD2
 calcGyroOffsets KEYWORD2
+
+SRF05 KEYWORD1
+ping  KEYWORD2
+convertCm KEYWORD2
+convertUs KEYWORD2
+pingCm  KEYWORD2
+pingMm  KEYWORD2
+pingMedian  KEYWORD2
+pingMedianCm  KEYWORD2
+pingMedianMm  KEYWORD2
+convertMm KEYWORD2
+getTriggerPin KEYWORD2
+getEchoPin  KEYWORD2
+setTriggerPin KEYWORD2
+setEchoPin  KEYWORD2
+getMaxDistance  KEYWORD2
+setMaxDistance  KEYWORD2
+
+Tank KEYWORD1
+start KEYWORD2
+stop  KEYWORD2
+faceLeft  KEYWORD2
+faceRight KEYWORD2
+setDirection  KEYWORD2
+forwards  KEYWORD2
+backwards KEYWORD2
+FORWARD LITERAL1
+BACKWARD  LITERAL1
+LEFT  LITERAL1
+RIGHT LITERAL1
+getDirection  KEYWORD2

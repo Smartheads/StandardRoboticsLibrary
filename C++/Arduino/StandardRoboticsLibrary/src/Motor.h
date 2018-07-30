@@ -33,6 +33,7 @@ namespace SRL
 	public:
 		/* Constructors */
 		Motor(unsigned int forwardPin, unsigned int backwardPin, unsigned int pwmPin);
+		~Motor(void);
 
 		/* Movement commands */
 		void start(void);
