@@ -34,6 +34,7 @@
 namespace SRL
 {
 	const unsigned int PWM_MAX_VALUE = 255;
+	const unsigned int PWM_MIN_VALUE = 0;
 }
 
 #endif // !SRL_LIB_H

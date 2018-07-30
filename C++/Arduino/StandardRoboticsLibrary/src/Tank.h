@@ -37,6 +37,7 @@ namespace SRL
   {
     public:
       Tank(SRL::Motor* leftMotor, SRL::Motor* rightMotor);
+      ~Tank(void);
 
       /* Movement commands */
       void start(void);

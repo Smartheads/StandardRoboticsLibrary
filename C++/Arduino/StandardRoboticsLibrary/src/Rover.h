@@ -29,16 +29,23 @@
 #include <Vector.h>
 #include <Tank.h>
 #include <Component.h>
-#include <cstdarg>
+#include <stdarg.h>
 #include <vector>
 
 namespace SRL
 {
-	class Rover: public Tank
+	class Rover : protected Tank
 	{
 		public:
 			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor,
-				 double x = 0.0, double y = 0.0, float direction = 0.0f, unsigned int argc = 0, ...);
+				 double x = 0.0, double y = 0.0, float direction = 0.0f);
+
+			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor,
+				 double x, double y, float direction, unsigned int argc, ...);
+
+			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, unsigned int argc, ...);
+
+			~Rover(void);
 
 			void initialize(void);
 
@@ -49,9 +56,11 @@ namespace SRL
 			void turnLeft(double amount = 90.0f);
 			void goTo(double x, double y);
 			void turnTo(SRL::Angle dir);
+			void stop(void);
 
 			/* Getters & setters */
 			float getDirection(void);
+			void setDirection(float direction);
 			double getX(void);
 			double getY(void);
 			void setX(double x);
@@ -64,20 +73,20 @@ namespace SRL
 				UPDATE_POSITION_INTERAL = 500
 			};
 
-		private:
-			double x;
-			double y;
+		protected:
+			void updateDirection(void);
+			void updatePosition(void);
+
+			double x, y;
 			SRL::Angle direction;
 			std::vector<SRL::Component*> components;
 
+		private:
 			bool turning = false;
 			SRL::Angle turnGoal;
 
 			bool movingStraight = false;
 			double xGoal, yGoal;
-
-			void updateDirection(void);
-			void updatePosition(void);
 	};
 }
 #endif

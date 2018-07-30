@@ -23,7 +23,7 @@
 */
 #include <SRF05.h>
 
-SRL::SRF05::SRF05(uint8_t triggerPin, uint8_t echoPin, double maxDistanceCm): Sonar(triggerPin, echoPin, convertUs(maxDistanceCm))
+SRL::SRF05::SRF05(uint8_t triggerPin, uint8_t echoPin, double maxDistanceCm): Sonar(triggerPin, echoPin, convertUs(maxDistanceCm)), Component(name)
 {
 
 }
@@ -57,5 +57,5 @@ double SRL::SRF05::convertCm(unsigned long us)
 
 unsigned long SRL::SRF05::convertUs(double cm)
 {
-  return cm * US_ROUNDTRIP_CM - (US_ROUNDTRIP_CM / 2);
+  return (cm - LINEAR_FUNCTION_INTERSECT) / LINEAR_FUNCTION_SLOPE;
 }

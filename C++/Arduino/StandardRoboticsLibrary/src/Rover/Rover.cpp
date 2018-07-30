@@ -23,13 +23,15 @@
 */
 #include <Rover.h>
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction, unsigned int argc...): Tank(leftMotor, rightMotor)
+SRL::Rover::Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, double x, double y, float direction): Tank(leftMotor, rightMotor)
 {
 	this->x = x;
 	this->y = y;
 	this->direction = SRL::Angle(direction);
+}
 
-	/* Process the components */
+SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction, unsigned int argc, ...): Rover(leftMotor, rightMotor, x, y, direction)
+{
 	va_list components;
 	va_start(components, argc);
 
@@ -39,6 +41,31 @@ SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, dou
 	}
 
 	va_end(components);
+}
+
+SRL::Rover::Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, unsigned int argc, ...): Rover(leftMotor, rightMotor)
+{
+	va_list components;
+	va_start(components, argc);
+
+	for (int i = 0; i < argc; i++)
+	{
+		this->components.push_back(va_arg(components, SRL::Component*));
+		Serial.println(this->components.back()->getName());
+	}
+
+	va_end(components);
+}
+
+SRL::Rover::~Rover(void)
+{
+	delete leftMotor;
+	delete rightMotor;
+
+	for (Component* c : components)
+	{
+		delete c;
+	}
 }
 
 void SRL::Rover::initialize(void)
@@ -131,9 +158,19 @@ void SRL::Rover::turnLeft(double amount)
 	turning = true;
 }
 
+void SRL::Rover::stop(void)
+{
+	Tank::stop();
+}
+
 float SRL::Rover::getDirection(void)
 {
 	return direction.getSize();
+}
+
+void SRL::Rover::setDirection(float direction)
+{
+	this->direction = SRL::Angle(direction);
 }
 
 double SRL::Rover::getX(void)

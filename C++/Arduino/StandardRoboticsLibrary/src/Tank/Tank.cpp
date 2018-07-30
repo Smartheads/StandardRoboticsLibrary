@@ -23,24 +23,46 @@
 */
 #include <Tank.h>
 
+/**
+* Class Tank's contructor.
+*
+* @param leftMotor The tank's left motor.
+* @param rightMotor The tank's right motor.
+*/
 SRL::Tank::Tank(SRL::Motor* leftMotor, SRL::Motor* rightMotor)
 {
   this->leftMotor = leftMotor;
   this->rightMotor = rightMotor;
 }
 
+SRL::Tank::~Tank(void)
+{
+  delete leftMotor;
+  delete rightMotor;
+}
+
+/**
+* Starts the tank's both motors.
+*/
 void SRL::Tank::start(void)
 {
   leftMotor->start();
   rightMotor->start();
 }
 
+/**
+* Stops the tank's both motors.
+*/
 void SRL::Tank::stop(void)
 {
   leftMotor->stop();
   rightMotor->stop();
 }
 
+/**
+* Sets the direction of the tank's motors so that the rover
+* will turn left if the motors are ran.
+*/
 void SRL::Tank::faceLeft(void)
 {
   leftMotor->backwards();
@@ -48,6 +70,10 @@ void SRL::Tank::faceLeft(void)
   direction = LEFT;
 }
 
+/**
+* Sets the direction of the tank's motors so that the rover
+* will turn left if the motors are ran.
+*/
 void SRL::Tank::faceRight(void)
 {
   leftMotor->forwards();
@@ -55,6 +81,9 @@ void SRL::Tank::faceRight(void)
   direction = RIGHT;
 }
 
+/**
+* Sets the tank's both motors direction to forwards.
+*/
 void SRL::Tank::forwards(void)
 {
   leftMotor->forwards();
@@ -62,6 +91,9 @@ void SRL::Tank::forwards(void)
   direction = FORWARD;
 }
 
+/**
+* Sets the tank's both motors direction to backwards.
+*/
 void SRL::Tank::backwards(void)
 {
   leftMotor->backwards();
@@ -69,6 +101,11 @@ void SRL::Tank::backwards(void)
   direction = BACKWARD;
 }
 
+/**
+* Sets the tank's motors direction to the given argument.
+*
+* @param state Position to set the tank's motors to.
+*/
 void SRL::Tank::setDirection(unsigned int state)
 {
   switch (state)

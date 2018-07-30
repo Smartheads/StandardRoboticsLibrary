@@ -23,6 +23,10 @@
 */
 #include <Motor.h>
 
+/**
+*	Class Motor's constructor.
+*
+*/
 SRL::Motor::Motor(unsigned int forwardPin, unsigned int backwardPin, unsigned int pwmPin)
 {
 	this->forwardPin = forwardPin;
@@ -32,25 +36,41 @@ SRL::Motor::Motor(unsigned int forwardPin, unsigned int backwardPin, unsigned in
 	pinMode(this->forwardPin, OUTPUT);
 	pinMode(this->backwardPin, OUTPUT);
 	pinMode(this->pwmPin, OUTPUT);
-	
+
 	forwards();
 	stop();
 
 	setSpeed(100.0f);
 }
 
+SRL::Motor::~Motor(void)
+{
+	stop();
+}
+
+/**
+*	Turns the motor on.
+*/
 void SRL::Motor::start(void)
 {
 	analogWrite(pwmPin, (int ((SRL::PWM_MAX_VALUE / 100.0f) * speed)));
 	moving = true;
 }
 
+/**
+*	Stops the motor.
+*/
 void SRL::Motor::stop(void)
 {
 	digitalWrite(pwmPin, LOW);
 	moving = false;
 }
 
+/**
+*	Set the motors direction to the given argument.
+*
+*	@param state The direction to set the motor to.
+*/
 void SRL::Motor::setDirection(unsigned int state)
 {
 	switch (state)
@@ -62,11 +82,11 @@ void SRL::Motor::setDirection(unsigned int state)
 			break;
 
 		case BACKWARD:
-			digitalWrite(backwardPin, HIGH);
 			digitalWrite(forwardPin, LOW);
+			digitalWrite(backwardPin, HIGH);
 			direction = state;
 			break;
-		
+
 		default:
 			break;
 	}
@@ -77,11 +97,17 @@ unsigned int SRL::Motor::getDirection(void)
 	return direction;
 }
 
+/**
+*	Sets the motor's direction to forwards.
+*/
 void SRL::Motor::forwards(void)
 {
 	setDirection(FORWARD);
 }
 
+/**
+*	Sets the motor's direction to backwards.
+*/
 void SRL::Motor::backwards(void)
 {
 	setDirection(BACKWARD);
@@ -107,12 +133,17 @@ float SRL::Motor::getSpeed(void)
 	return speed;
 }
 
+/**
+*	Sets the motors speed to the given argument.
+*
+*	@param float Speed of the motor (in procentage!).
+*/
 void SRL::Motor::setSpeed(float speed)
 {
 	if (speed >= 0 && speed <= 100)
 	{
 		this->speed = speed;
-		
+
 		if (moving)
 		{
 			start();

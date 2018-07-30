@@ -28,6 +28,8 @@
 *
 * @param triggerPin Sonar's trigger pin.
 * @param echoPin Sonar's echo pin.
+* @param name The sonar's name.
+* @param maxDistanceCm The furthest the sensor will detect objects (in cm).
 */
 SRL::Sonar::Sonar(uint8_t triggerPin, uint8_t echoPin, unsigned long maxDistanceCm)
 {
