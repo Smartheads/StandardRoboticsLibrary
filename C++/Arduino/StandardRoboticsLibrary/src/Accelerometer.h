@@ -66,9 +66,9 @@ namespace SRL
 
       virtual bool setAccelSensitivity(uint8_t setting) = 0;
 
-      void calcAccelOffsets(uint8_t orientation = Y_UP, bool console = false, unsigned int iterations = 3);
+      void calcAccelOffsets(uint8_t orientation = Y_UP, bool console = false, unsigned int iterations = 5);
 
-      enum Orientation
+      const enum Orientation
       {
         X_UP = 1,
         X_DOWN = 2,

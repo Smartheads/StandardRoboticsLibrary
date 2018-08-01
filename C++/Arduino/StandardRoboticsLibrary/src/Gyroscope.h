@@ -53,7 +53,7 @@ namespace SRL
 			void setGyroZOffset(int16_t offset);
 
       void setGyroOffsets(int16_t x, int16_t y, int16_t z);
-      void calcGyroOffsets(bool console, unsigned int interations = 5);
+      void calcGyroOffsets(bool console = false, unsigned int interations = 5);
 
       virtual bool setGyroSensitivity(uint8_t setting) = 0;
 
