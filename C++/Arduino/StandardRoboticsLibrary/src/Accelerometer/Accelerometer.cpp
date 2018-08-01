@@ -93,7 +93,7 @@ void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, uns
 	{
 		long accelX = 0, accelY = 0, accelZ = 0;
 
-		for (unsigned int i = 0; i < CALIBRATION_I; i++)
+		for (unsigned int i = 0; i < ACCEL_CALIBRATION_I; i++)
 		{
 				accelX += getRawAccelX() - getAccelXOffset();
 				accelY += getRawAccelY() - getAccelYOffset();
@@ -105,9 +105,9 @@ void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, uns
 			Serial.print(".");
 		}
 
-		accelX /= CALIBRATION_I;
-		accelY /= CALIBRATION_I;
-		accelZ /= CALIBRATION_I;
+		accelX /= ACCEL_CALIBRATION_I;
+		accelY /= ACCEL_CALIBRATION_I;
+		accelZ /= ACCEL_CALIBRATION_I;
 
 		setAccelOffsets(
 			 (targetX - accelX) * -1 + getAccelXOffset(),

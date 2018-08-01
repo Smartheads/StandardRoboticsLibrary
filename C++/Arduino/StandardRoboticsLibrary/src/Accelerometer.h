@@ -28,7 +28,7 @@
 #include <Component.h>
 #include <Statistics.h>
 
-#define CALIBRATION_I 200
+#define ACCEL_CALIBRATION_I 200
 
 namespace SRL
 {
