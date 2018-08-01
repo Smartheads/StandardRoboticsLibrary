@@ -74,7 +74,7 @@ namespace SRL
 	*	Class MPU6050. A class for communicating with the MPU6050 accelerometer
 	* and gyroscope.
 	*/
-	class MPU6050 : public SRL::I2CDevice, public SRL::Accelerometer, public SRL::Gyroscope//, public SRL::Component
+	class MPU6050 : protected SRL::I2CDevice, public SRL::Accelerometer, public SRL::Gyroscope
 	{
 		public:
 			MPU6050(uint8_t address, float aC = 0.02f, float gC = 0.98f);
