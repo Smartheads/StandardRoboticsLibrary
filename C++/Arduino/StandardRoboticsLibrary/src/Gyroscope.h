@@ -27,6 +27,8 @@
 #include <SRL.h>
 #include <Component.h>
 
+#define GYRO_CALIBRATION_I 200
+
 namespace SRL
 {
   class Gyroscope : virtual public SRL::Component
@@ -51,7 +53,7 @@ namespace SRL
 			void setGyroZOffset(int16_t offset);
 
       void setGyroOffsets(int16_t x, int16_t y, int16_t z);
-      void calcGyroOffsets(bool console, unsigned int interations = 3000);
+      void calcGyroOffsets(bool console, unsigned int interations = 5);
 
       virtual bool setGyroSensitivity(uint8_t setting) = 0;
 
