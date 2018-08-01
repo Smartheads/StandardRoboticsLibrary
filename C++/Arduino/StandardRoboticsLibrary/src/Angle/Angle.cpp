@@ -1,13 +1,12 @@
-// 
-// 
-// 
+//
+//
+//
 
 #include <Angle.h>
 
-SRL::Angle::Angle(float size)
+SRL::Angle::Angle(float size) : Angle(size, 360)
 {
-	this->vollWinkel = 360;
-	setAngle(size);
+
 }
 
 SRL::Angle::Angle(float size, unsigned int vollWinkel)
