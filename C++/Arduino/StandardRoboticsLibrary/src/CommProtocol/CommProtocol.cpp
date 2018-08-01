@@ -91,10 +91,7 @@ byte SRL::CommProtocol::readByte(uint8_t reg)
 */
 int16_t SRL::CommProtocol::readInt16_t(uint8_t reg)
 {
-	int16_t a = (int16_t) readByte(reg);
-	reg++;
-
-	return a << 8 | readByte(++reg);
+	return ((int16_t) readByte(reg)) << 8 | readByte(++reg);
 }
 
 uint8_t SRL::CommProtocol::getAddress(void)

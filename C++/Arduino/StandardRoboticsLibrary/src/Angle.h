@@ -47,4 +47,3 @@ namespace SRL
 	};
 }
 #endif
-

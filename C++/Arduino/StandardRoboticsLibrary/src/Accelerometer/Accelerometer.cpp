@@ -25,7 +25,7 @@
 
 SRL::Accelerometer::Accelerometer(String name) : Component(name)
 {
-	
+
 }
 
 /**
@@ -40,6 +40,155 @@ void SRL::Accelerometer::setAccelOffsets(int16_t x, int16_t y, int16_t z)
 	setAccelXOffset(x);
 	setAccelYOffset(y);
 	setAccelZOffset(z);
+}
+
+/**
+*	Calculate the accelerometer's offsets, based on its default orientation.
+*
+*	@param orientation The accelerometer's orientation.
+* @param console Output stuff to serial on the progress of the calibration.
+* @param iterations The number of iterations used to Calculate the offsets.
+*/
+void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, unsigned int iterations)
+{
+	int16_t targetX = 0, targetY = 0, targetZ = 0;
+
+	if (console)
+	{
+		Serial.println("Calibrating accelerometer");
+	}
+
+	switch (orientation) {
+		case X_UP:
+			targetX = accelSensitivity;
+			break;
+
+		case X_DOWN:
+			targetX = -1 * accelSensitivity;
+			break;
+
+		case Y_UP:
+			targetY = accelSensitivity;
+			break;
+
+		case Y_DOWN:
+			targetY = -1 * accelSensitivity;
+			break;
+
+		case Z_UP:
+			targetZ = accelSensitivity;
+			break;
+
+		case Z_DOWN:
+			targetZ = -1 * accelSensitivity;
+			break;
+
+		default:
+			Serial.println("default");
+			calcAccelOffsets();
+			return;
+	}
+
+	for (int x = 0; x < iterations; x++)
+	{
+		long accelX = 0, accelY = 0, accelZ = 0;
+
+		for (unsigned int i = 0; i < ACCEL_CALIBRATION_I; i++)
+		{
+				accelX += getRawAccelX() - getAccelXOffset();
+				accelY += getRawAccelY() - getAccelYOffset();
+				accelZ += getRawAccelZ() - getAccelZOffset();
+		}
+
+		if (console)
+		{
+			Serial.print(".");
+		}
+
+		accelX /= ACCEL_CALIBRATION_I;
+		accelY /= ACCEL_CALIBRATION_I;
+		accelZ /= ACCEL_CALIBRATION_I;
+
+		setAccelOffsets(
+			 (targetX - accelX) * -1 + getAccelXOffset(),
+			 (targetY - accelY) * -1 + getAccelYOffset(),
+			 (targetZ - accelZ) * -1 + getAccelZOffset()
+		 );
+	}
+
+	if (console)
+	{
+		Serial.println("\nCalibration complete! Your offsets are:");
+		Serial.print("x: "); Serial.print(getAccelXOffset(), DEC);
+		Serial.print(" y: "); Serial.print(getAccelYOffset(), DEC);
+		Serial.print(" z: "); Serial.println(getAccelZOffset(), DEC);
+		Serial.println("Your accelerometer readings are:");
+		Serial.print("x: "); Serial.print(getRawAccelX() - getAccelXOffset());
+		Serial.print(" y: "); Serial.print(getRawAccelY() - getAccelYOffset());
+		Serial.print(" z: "); Serial.println(getRawAccelZ() - getAccelZOffset());
+	}
+}
+
+/**
+*	Returns the median of raw accelerometer readings on the x-axis.
+*
+* @param iterations The number of readings to take.
+*/
+int16_t SRL::Accelerometer::getRawAccelXMedian(unsigned int iterations)
+{
+	int16_t samples[iterations];
+	for (unsigned int i = 0; i < iterations; i++)
+	{
+		samples[i] = getRawAccelX();
+	}
+
+	return getMedian<int16_t>(iterations, samples);
+}
+
+/**
+*	Returns the median of raw accelerometer readings on the y-axis.
+*
+* @param iterations The number of readings to take.
+*/
+int16_t SRL::Accelerometer::getRawAccelYMedian(unsigned int iterations)
+{
+	int16_t samples[iterations];
+	for (unsigned int i = 0; i < iterations; i++)
+	{
+		samples[i] = getRawAccelY();
+	}
+
+	return getMedian<int16_t>(iterations, samples);
+}
+/**
+*	Returns the median of raw accelerometer readings on the z-axis.
+*
+* @param iterations The number of readings to take.
+*/
+int16_t SRL::Accelerometer::getRawAccelZMedian(unsigned int iterations)
+{
+	int16_t samples[iterations];
+	for (unsigned int i = 0; i < iterations; i++)
+	{
+		samples[i] = getRawAccelZ();
+	}
+
+	return getMedian<int16_t>(iterations, samples);
+}
+
+double SRL::Accelerometer::getAccelXMedian(unsigned int iterations)
+{
+	return (getRawAccelXMedian() - accelXOffset) / accelSensitivity;
+}
+
+double SRL::Accelerometer::getAccelYMedian(unsigned int iterations)
+{
+	return (getRawAccelXMedian() - accelYOffset) / accelSensitivity;
+}
+
+double SRL::Accelerometer::getAccelZMedian(unsigned int iterations)
+{
+	return (getRawAccelZMedian() - accelXOffset) / accelSensitivity;
 }
 
 double SRL::Accelerometer::getAccelX(void)

@@ -26,6 +26,9 @@
 
 #include <SRL.h>
 #include <Component.h>
+#include <Statistics.h>
+
+#define ACCEL_CALIBRATION_I 200
 
 namespace SRL
 {
@@ -39,9 +42,18 @@ namespace SRL
       virtual int16_t getRawAccelY(void) = 0;
       virtual int16_t getRawAccelZ(void) = 0;
 
+      int16_t getRawAccelXMedian(unsigned int iterations = 5);
+      int16_t getRawAccelYMedian(unsigned int iterations = 5);
+      int16_t getRawAccelZMedian(unsigned int iterations = 5);
+
+
       double getAccelX(void);
       double getAccelY(void);
       double getAccelZ(void);
+
+      double getAccelXMedian(unsigned int iterations = 5);
+      double getAccelYMedian(unsigned int iterations = 5);
+      double getAccelZMedian(unsigned int iterations = 5);
 
       int16_t getAccelXOffset(void);
       void setAccelXOffset(int16_t offset);
@@ -53,6 +65,18 @@ namespace SRL
       void setAccelOffsets(int16_t x, int16_t y, int16_t z);
 
       virtual bool setAccelSensitivity(uint8_t setting) = 0;
+
+      void calcAccelOffsets(uint8_t orientation = Y_UP, bool console = false, unsigned int iterations = 5);
+
+      const enum Orientation
+      {
+        X_UP = 1,
+        X_DOWN = 2,
+        Y_UP = 3,
+        Y_DOWN = 4,
+        Z_UP = 5,
+        Z_DOWN = 6
+      };
 
     protected:
       double accelSensitivity;
