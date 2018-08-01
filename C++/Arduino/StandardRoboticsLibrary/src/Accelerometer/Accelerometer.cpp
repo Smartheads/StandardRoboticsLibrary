@@ -142,7 +142,7 @@ int16_t SRL::Accelerometer::getRawAccelXMedian(unsigned int iterations)
 		samples[i] = getRawAccelX();
 	}
 
-	return getMedian(iterations, samples);
+	return getMedian<int16_t>(iterations, samples);
 }
 
 /**
@@ -158,7 +158,7 @@ int16_t SRL::Accelerometer::getRawAccelYMedian(unsigned int iterations)
 		samples[i] = getRawAccelY();
 	}
 
-	return getMedian(iterations, samples);
+	return getMedian<int16_t>(iterations, samples);
 }
 /**
 *	Returns the median of raw accelerometer readings on the z-axis.
@@ -173,32 +173,7 @@ int16_t SRL::Accelerometer::getRawAccelZMedian(unsigned int iterations)
 		samples[i] = getRawAccelZ();
 	}
 
-	return getMedian(iterations, samples);
-}
-
-
-/**
-*	Returns the median of a dataset.
-*
-*	@param argc The length of the dataset.
-*	@param argv A pointer to the first element of the array.
-*/
-int16_t SRL::Accelerometer::getMedian(unsigned int argc, int16_t* argv)
-{
-	unsigned int j;
-
-	for (unsigned int i = 1; i < argc; i++)
-	{
-		j = i;
-		for (j = i; j > 0 && argv[j - 1] > argv[j]; j--)
-		{
-			int16_t t = argv[j];
-			argv[j] = argv[j - 1];
-			argv[j - 1] = t;
-		}
-	}
-
-	return argv[(unsigned int) argc / 2];
+	return getMedian<int16_t>(iterations, samples);
 }
 
 double SRL::Accelerometer::getAccelXMedian(unsigned int iterations)

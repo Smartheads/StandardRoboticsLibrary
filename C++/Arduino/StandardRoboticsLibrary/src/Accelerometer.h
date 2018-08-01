@@ -26,6 +26,7 @@
 
 #include <SRL.h>
 #include <Component.h>
+#include <Statistics.h>
 
 #define CALIBRATION_I 200
 
@@ -78,8 +79,6 @@ namespace SRL
       };
 
     protected:
-      int16_t getMedian(unsigned int argc, int16_t* argv);
-
       double accelSensitivity;
 
       int16_t accelXOffset;
