@@ -109,6 +109,69 @@ double SRL::Gyroscope::getGyroZ(void)
 	return (getRawGyroZ() - gyroXOffset) / gyroSensitivity;
 }
 
+/**
+*	Returns the median of raw gyroscope readings on the x-axis.
+*
+*	@param iterations The number of readings to take.
+*/
+int16_t SRL::Gyroscope::getRawGyroXMedian(unsigned int iterations)
+{
+	int16_t samples[iterations];
+	for (unsigned int i = 0; i < iterations; i++)
+	{
+		samples[i] = getRawGyroX();
+	}
+
+	return getMedian<int16_t>(iterations, samples);
+}
+
+/**
+*	Returns the median of raw gyroscope readings on the y-axis.
+*
+*	@param iterations The number of readings to take.
+*/
+int16_t SRL::Gyroscope::getRawGyroYMedian(unsigned int iterations)
+{
+	int16_t samples[iterations];
+	for (unsigned int i = 0; i < iterations; i++)
+	{
+		samples[i] = getRawGyroY();
+	}
+
+	return getMedian<int16_t>(iterations, samples);
+}
+
+/**
+*	Returns the median of raw gyroscope readings on the z-axis.
+*
+*	@param iterations The number of readings to take.
+*/
+int16_t SRL::Gyroscope::getRawGyroZMedian(unsigned int iterations)
+{
+	int16_t samples[iterations];
+	for (unsigned int i = 0; i < iterations; i++)
+	{
+		samples[i] = getRawGyroZ();
+	}
+
+	return getMedian<int16_t>(iterations, samples);
+}
+
+double SRL::Gyroscope::getGyroXMedian(unsigned int iterations)
+{
+	return (getRawGyroXMedian() - gyroXOffset) / gyroSensitivity;
+}
+
+double SRL::Gyroscope::getGyroYMedian(unsigned int iterations)
+{
+	return (getRawGyroYMedian() - gyroXOffset) / gyroSensitivity;
+}
+
+double SRL::Gyroscope::getGyroZMedian(unsigned int iterations)
+{
+	return (getRawGyroZMedian() - gyroXOffset) / gyroSensitivity;
+}
+
 int16_t SRL::Gyroscope::getGyroXOffset(void)
 {
 	return gyroXOffset;

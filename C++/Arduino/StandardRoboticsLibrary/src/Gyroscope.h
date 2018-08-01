@@ -26,6 +26,7 @@
 
 #include <SRL.h>
 #include <Component.h>
+#include <Statistics.h>
 
 #define GYRO_CALIBRATION_I 200
 
@@ -41,10 +42,19 @@ namespace SRL
 			virtual int16_t getRawGyroY(void) = 0;
 			virtual int16_t getRawGyroZ(void) = 0;
 
+      int16_t getRawGyroXMedian(unsigned int iterations = 5);
+      int16_t getRawGyroYMedian(unsigned int iterations = 5);
+      int16_t getRawGyroZMedian(unsigned int iterations = 5);
+
       double getGyroX(void);
 			double getGyroY(void);
 			double getGyroZ(void);
 
+      double getGyroXMedian(unsigned int iterations = 5);
+      double getGyroYMedian(unsigned int iterations = 5);
+      double getGyroZMedian(unsigned int iterations = 5);
+
+      /* Getters & setters */
       int16_t getGyroXOffset(void);
 			void setGyroXOffset(int16_t offset);
 			int16_t getGyroYOffset(void);
