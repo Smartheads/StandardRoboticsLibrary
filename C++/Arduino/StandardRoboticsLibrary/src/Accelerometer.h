@@ -68,7 +68,7 @@ namespace SRL
 
       void calcAccelOffsets(uint8_t orientation = Y_UP, bool console = false, unsigned int iterations = 5);
 
-      const enum Orientation
+      enum Orientation
       {
         X_UP = 1,
         X_DOWN = 2,

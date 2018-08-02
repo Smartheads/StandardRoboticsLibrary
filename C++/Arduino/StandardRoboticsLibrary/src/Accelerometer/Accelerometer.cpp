@@ -84,7 +84,6 @@ void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, uns
 			break;
 
 		default:
-			Serial.println("default");
 			calcAccelOffsets();
 			return;
 	}
