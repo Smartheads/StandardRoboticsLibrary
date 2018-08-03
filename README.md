@@ -4,6 +4,8 @@ About
 -
 The Standard Robotics Library project is a project aimed to create a universal framework for robotics development on desktop and mobile (Arduino, Raspberry PI) platforms.
 
+Be sure to check out our SRL wiki!
+
 Planed packages
 -
 Desktop
