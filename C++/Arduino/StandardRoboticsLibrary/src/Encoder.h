@@ -21,56 +21,21 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _TANK_H
-#define _TANK_H
+#ifndef _ENCODER_H
+#define _ENCODER_H
 
 #include <SRL.h>
-#include <Motor.h>
+#include <Component.h>
+#include <Paul_encoder.h>
+
+#define ROTARY_ENCODER_COMPONENT_NAME "RotaryEncoder"
 
 namespace SRL
 {
-  /**
-  * Class Tank. Defines a tank according to SCSRLG/TG1204.
-  * Includes functions for the control of 2 motors next to eachother.
-  */
-  class Tank
+  class Encoder : public Paul_Encoder, public SRL::Component
   {
     public:
-      Tank(SRL::Motor* leftMotor, SRL::Motor* rightMotor);
-      ~Tank(void);
-
-      /* Movement commands */
-      void start(void);
-      void stop(void);
-      void faceRight(void);
-      void faceLeft(void);
-
-      void setDirection(unsigned int state);
-      void forwards(void);
-      void backwards(void);
-      void setUnifiedSpeed(float speed);
-
-      /* Enums */
-      enum States
-      {
-        FORWARD = 1,
-        BACKWARD = 2,
-        LEFT = 3,
-        RIGHT = 4
-      };
-
-      /* Getters & setters */
-      unsigned int getDirection(void);
-      SRL::Motor* getLeftMotor(void);
-      SRL::Motor* getRightMotor(void);
-
-    protected:
-      SRL::Motor* leftMotor;
-      SRL::Motor* rightMotor;
-
-    private:
-      unsigned int direction;
-
+      Encoder(unsigned int c1, unsigned int c2);
   };
 }
 

@@ -102,6 +102,17 @@ void SRL::Tank::backwards(void)
 }
 
 /**
+* Sets the speed of both motors to the argument.
+*
+* @param speed The speed to set the motors to.
+*/
+void SRL::Tank::setUnifiedSpeed(float speed)
+{
+  leftMotor->setSpeed(speed);
+  rightMotor->setSpeed(speed);
+}
+
+/**
 * Sets the tank's motors direction to the given argument.
 *
 * @param state Position to set the tank's motors to.
@@ -134,4 +145,14 @@ void SRL::Tank::setDirection(unsigned int state)
 unsigned int SRL::Tank::getDirection(void)
 {
   return direction;
+}
+
+SRL::Motor* SRL::Tank::getLeftMotor(void)
+{
+  return leftMotor;
+}
+
+SRL::Motor* SRL::Tank::getRightMotor(void)
+{
+  return rightMotor;
 }
