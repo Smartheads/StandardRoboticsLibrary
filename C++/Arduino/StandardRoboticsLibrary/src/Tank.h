@@ -48,6 +48,7 @@ namespace SRL
       void setDirection(unsigned int state);
       void forwards(void);
       void backwards(void);
+      void setUnifiedSpeed(float speed);
 
       /* Enums */
       enum States
@@ -60,6 +61,8 @@ namespace SRL
 
       /* Getters & setters */
       unsigned int getDirection(void);
+      SRL::Motor* getLeftMotor(void);
+      SRL::Motor* getRightMotor(void);
 
     protected:
       SRL::Motor* leftMotor;
