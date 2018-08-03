@@ -77,13 +77,13 @@ void SRL::Gyroscope::calcGyroOffsets(bool console, unsigned int iterations)
 		setGyroOffsets(
 			gyroX + getGyroXOffset(),
 			gyroY + getGyroYOffset(),
-			gyroX + getGyroZOffset()
+			gyroZ + getGyroZOffset()
 		);
 	}
 
 	if (console)
 	{
-		Serial.print("Your gyro offsets are: ");
+		Serial.print("\nYour gyro offsets are: ");
 		Serial.print("x: "); Serial.print(getGyroXOffset());
 		Serial.print(" y: "); Serial.print(getGyroYOffset());
 		Serial.print(" z: "); Serial.println(getGyroZOffset());
