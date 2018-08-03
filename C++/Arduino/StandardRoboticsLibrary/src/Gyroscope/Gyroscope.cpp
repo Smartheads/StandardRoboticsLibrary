@@ -52,7 +52,7 @@ void SRL::Gyroscope::calcGyroOffsets(bool console, unsigned int iterations)
 {
 	if (console)
 	{
-		Serial.println("Calculating gyro offsets...");
+		Serial.println("Calculating gyroscope");
 	}
 	for (int x = 0; x < iterations; x++)
 	{
@@ -77,20 +77,20 @@ void SRL::Gyroscope::calcGyroOffsets(bool console, unsigned int iterations)
 		setGyroOffsets(
 			gyroX + getGyroXOffset(),
 			gyroY + getGyroYOffset(),
-			gyroX + getGyroZOffset()
+			gyroZ + getGyroZOffset()
 		);
 	}
 
 	if (console)
 	{
-		Serial.print("Your gyro offsets are: ");
-		Serial.print(getGyroXOffset()); Serial.print(" ");
-		Serial.print(getGyroYOffset()); Serial.print(" ");
-		Serial.println(getGyroZOffset());
-		Serial.println("The gyro readings should be 0 0 0. They are: ");
-		Serial.print(getRawGyroX() - getGyroXOffset()); Serial.print(" ");
-		Serial.print(getRawGyroY() - getGyroYOffset()); Serial.print(" ");
-		Serial.println(getRawGyroZ() - getGyroZOffset());
+		Serial.print("\nYour gyro offsets are: ");
+		Serial.print("x: "); Serial.print(getGyroXOffset());
+		Serial.print(" y: "); Serial.print(getGyroYOffset());
+		Serial.print(" z: "); Serial.println(getGyroZOffset());
+		Serial.println("Your gyroscope readings are:");
+		Serial.print("x: "); Serial.print(getRawGyroX() - getGyroXOffset());
+		Serial.print(" y: "); Serial.print(getRawGyroY() - getGyroYOffset());
+		Serial.print(" z: "); Serial.println(getRawGyroZ() - getGyroZOffset());
 	}
 }
 

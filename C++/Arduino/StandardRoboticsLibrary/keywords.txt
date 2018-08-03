@@ -88,6 +88,25 @@ setGyroZOffset	KEYWORD2
 setAccelOffsets	KEYWORD2
 setGyroOffsets	KEYWORD2
 calcGyroOffsets	KEYWORD2
+calcAccelOffsets	KEYWORD2
+getRawAccelXMedian	KEYWORD2
+getRawAccelYMedian	KEYWORD2
+getRawAccelZMedian	KEYWORD2
+getAccelXMedian	KEYWORD2
+getAccelYMedian	KEYWORD2
+getAccelZMedian	KEYWORD2
+getRawGyroXMedian	KEYWORD2
+getRawGyroYMedian	KEYWORD2
+getRawGyroZMedian	KEYWORD2
+getGyroXMedian	KEYWORD2
+getGyroYMedian	KEYWORD2
+getGyroZMedian	KEYWORD2
+X_UP	LITERAL1
+X_DOWN	LITERAL1
+Y_UP	LITERAL1
+Y_DOWN	LITERAL1
+Z_DOWN	LITERAL1
+Z_UP	LITERAL1
 
 SRF05	KEYWORD1
 ping	KEYWORD2
@@ -119,3 +138,6 @@ BACKWARD	LITERAL1
 LEFT	LITERAL1
 RIGHT	LITERAL1
 getDirection	KEYWORD2
+
+getMedian	KEYWORD2
+getAverage	KEYWORD2
