@@ -28,15 +28,21 @@
 #include <Component.h>
 #include <Paul_encoder.h>
 
-#define ROTARY_ENCODER_COMPONENT_NAME "RotaryEncoder"
-
 namespace SRL
 {
-  class Encoder : public Paul_Encoder, public SRL::Component
+  class Encoder : public Paul_Encoder, public virtual SRL::Component
   {
     public:
       Encoder(unsigned int c1, unsigned int c2);
+
+      double readCm(void);
+      double readMm(void);
+
+      void writeCm(double cm);
+      void writeMm(double mm);
+
+      virtual long convertSteps(double cm) = 0;
+      virtual double convertCm(long steps) = 0;
   };
 }
-
 #endif

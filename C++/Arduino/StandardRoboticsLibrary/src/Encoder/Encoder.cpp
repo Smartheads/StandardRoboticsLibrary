@@ -23,7 +23,27 @@
 */
 #include <Encoder.h>
 
-SRL::Encoder::Encoder(unsigned int c1, unsigned int c2) : Paul_Encoder(c1, c2), Component(ROTARY_ENCODER_COMPONENT_NAME)
+SRL::Encoder::Encoder(unsigned int c1, unsigned int c2) : Paul_Encoder(c1, c2)
 {
 
+}
+
+double SRL::Encoder::readCm()
+{
+  return convertCm(read());
+}
+
+double SRL::Encoder::readMm(void)
+{
+  return readCm() * 10;
+}
+
+void SRL::Encoder::writeCm(double cm)
+{
+  write(convertSteps(cm));
+}
+
+void SRL::Encoder::writeMm(double mm)
+{
+  writeCm(mm / 10);
 }
