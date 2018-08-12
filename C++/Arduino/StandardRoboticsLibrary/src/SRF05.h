@@ -28,13 +28,14 @@
 #include <Sonar.h>
 #include <Component.h>
 
+#define SRF05_COMPONENT_NAME "SRF05"
 #define PING_OVERHEAD 5
 #define LINEAR_FUNCTION_SLOPE 0.015030304195946
 #define LINEAR_FUNCTION_INTERSECT -2.6324
 
 namespace SRL
 {
-  class SRF05 : public Sonar, public Component
+  class SRF05 : public Sonar
   {
     public:
       SRF05(uint8_t triggerPin, uint8_t echoPin, double maxDistanceCm = 400);
@@ -46,8 +47,6 @@ namespace SRL
 
     private:
       void pingTrigger(void);
-
-      const String name = "SRF05";
   };
 }
 #endif
