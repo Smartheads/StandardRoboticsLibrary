@@ -35,9 +35,6 @@ namespace SRL
   class Gyroscope : virtual public SRL::Component
   {
     public:
-      Gyroscope(String name);
-      virtual void initialize(void) = 0;
-
       virtual int16_t getRawGyroX(void) = 0;
 			virtual int16_t getRawGyroY(void) = 0;
 			virtual int16_t getRawGyroZ(void) = 0;
