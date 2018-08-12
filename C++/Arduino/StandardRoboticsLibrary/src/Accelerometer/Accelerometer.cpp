@@ -23,11 +23,6 @@
 */
 #include <Accelerometer.h>
 
-SRL::Accelerometer::Accelerometer(String name) : Component(name)
-{
-
-}
-
 /**
 *	Set the accelerometer's offsets.
 *
