@@ -44,7 +44,7 @@ SRL::Vector SRL::Vector::addition(Vector a, Vector b)
 SRL::Vector SRL::Vector::addition(int argc, Vector * argv)
 {
 	Vector v(0, 0);
-	
+
 	for (int i = 0; i < argc; i++)
 	{
 		v = v.add(*(argv + i));
