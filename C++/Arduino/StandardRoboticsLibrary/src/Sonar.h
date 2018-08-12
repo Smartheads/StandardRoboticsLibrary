@@ -25,13 +25,14 @@
 #define _SONAR_H
 
 #include <SRL.h>
+#include <Component.h>
 
 #define NO_ECHO 0
 #define PING_MEDIAN_DELAY 29000
 
 namespace SRL
 {
-  class Sonar
+  class Sonar : public virtual SRL::Component
   {
     public:
       Sonar(uint8_t triggerPin, uint8_t echoPin, unsigned long maxDistanceCm = 22770);
