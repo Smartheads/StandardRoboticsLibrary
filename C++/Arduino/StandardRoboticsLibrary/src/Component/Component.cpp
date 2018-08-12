@@ -25,9 +25,20 @@
 
 unsigned int SRL::Component::lastId = 0;
 
-SRL::Component::Component(String name)
+/**
+* The default constructor of class Component.
+* To be used only be abstract classes.
+*
+*/
+SRL::Component::Component(void)
+{
+
+}
+
+SRL::Component::Component(String name, unsigned int type)
 {
   this->name = name;
+  this->type = type;
   this->id = ++lastId;
 }
 
