@@ -26,8 +26,7 @@
 
 #include <SRL.h>
 #include <I2C.h>
-#include <Accelerometer.h>
-#include <Gyroscope.h>
+#include <AccelGyro.h>
 #include <Component.h>
 
 #define MPU6050_COMPONENT_NAME "MPU6050"
@@ -74,7 +73,7 @@ namespace SRL
 	*	Class MPU6050. A class for communicating with the MPU6050 accelerometer
 	* and gyroscope.
 	*/
-	class MPU6050 : protected SRL::I2CDevice, public SRL::Accelerometer, public SRL::Gyroscope
+	class MPU6050 : protected SRL::I2CDevice, public SRL::AccelGyro
 	{
 		public:
 			MPU6050(uint8_t address, float aC = 0.02f, float gC = 0.98f);
@@ -93,17 +92,8 @@ namespace SRL
 			double getTemp(void);
 
 			/* Getters and setters */
-			float getAccelCoeff(void);
-			void setAccelCoeff(float aC);
-			float getGyroCoeff(void);
-			void setGyroCoeff(float gC);
-
 			bool setAccelSensitivity(uint8_t setting);
 			bool setGyroSensitivity(uint8_t setting);
-
-		private:
-			float aC;
-			float gC;
 	};
 }
 
