@@ -30,67 +30,26 @@ SRL::Rover::Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, double x, doubl
 	this->direction = SRL::Angle(direction);
 }
 
-SRL::Rover::Rover(SRL::Motor * leftMotor, SRL::Motor * rightMotor, double x, double y, float direction, unsigned int argc, ...): Rover(leftMotor, rightMotor, x, y, direction)
-{
-	va_list components;
-	va_start(components, argc);
-
-	for (int i = 0; i < argc; i++)
-	{
-		this->components.push_back(va_arg(components, SRL::Component*));
-	}
-
-	va_end(components);
-}
-
-SRL::Rover::Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, unsigned int argc, ...): Rover(leftMotor, rightMotor)
-{
-	va_list components;
-	va_start(components, argc);
-
-	for (int i = 0; i < argc; i++)
-	{
-		this->components.push_back(va_arg(components, SRL::Component*));
-		Serial.println(this->components.back()->getName());
-	}
-
-	va_end(components);
-}
-
 SRL::Rover::~Rover(void)
 {
 	delete leftMotor;
 	delete rightMotor;
-
-	for (Component* c : components)
-	{
-		delete c;
-	}
 }
 
+/**
+*	Initialize the rover.
+*
+*/
 void SRL::Rover::initialize(void)
 {
-	/* initialize all components */
-	for (Component* c : components)
-	{
-		c->initialize();
-	}
-}
+	if (leftEncoder != NULL)
+		leftEncoder->initialize();
 
-void SRL::Rover::updateDirection(void)
-{
+	if (rightEncoder != NULL)
+		rightEncoder->initialize();
 
-}
-
-void SRL::Rover::updatePosition(void)
-{
-	//mpu->interruptUpdate(GYROSCOPE_INTERVAL);
-	//direction.setAngle(mpu->getAngleX());
-
-	if(movingStraight)
-	{
-
-	}
+	if (accelGyro != NULL)
+		accelGyro->initialize();
 }
 
 void SRL::Rover::goTo(double x, double y)
@@ -120,8 +79,8 @@ void SRL::Rover::forward(double distance)
 	xGoal = g.getX() + x;
 	yGoal = g.getY() + y;
 
-	forwards();
-	start();
+	Tank::forwards();
+	Tank::start();
 
 	movingStraight = true;
 }
@@ -132,8 +91,8 @@ void SRL::Rover::backward(double distance)
 	xGoal = g.getX() + x;
 	yGoal = g.getY() + y;
 
-	backwards();
-	start();
+	Tank::backwards();
+	Tank::start();
 
 	movingStraight = true;
 }
@@ -161,6 +120,77 @@ void SRL::Rover::turnLeft(double amount)
 void SRL::Rover::stop(void)
 {
 	Tank::stop();
+	movingStraight = false;
+	turning = false;
+}
+
+/**
+*	An interrupt routine to correct the rover's motors.
+*/
+void SRL::Rover::correctMotors(void)
+{
+	if (movingStraight)
+	{
+		if (Tank::getDirection() == Tank::FORWARD)
+		{
+			long l = leftEncoder->read();
+			long r = rightEncoder->read();
+
+			if (l > r)
+			{
+				leftMotor->setSpeed(getCorrectionSpeed(l-r));
+				rightMotor->setSpeed(100);
+			}
+			else if (l != r)
+			{
+				rightMotor->setSpeed(getCorrectionSpeed(r-l));
+				leftMotor->setSpeed(100);
+			}
+			else
+			{
+				setUnifiedSpeed(100);
+			}
+		}
+	}
+}
+
+/**
+*	An interrupt routine to update the rover's virtual position.
+*/
+void SRL::Rover::updatePosition(void)
+{
+	/* Get traveled distance */
+	double* e = new double[2];
+	e[0] = leftEncoder->readCm();
+	e[1] = rightEncoder->readCm();
+	double d = getAverage(2, e);
+
+	leftEncoder->write(0);
+	rightEncoder->write(0);
+
+	/* Get direction */
+
+	/* Combine data with current position */
+	SRL::Vector v(getDirection(), d);
+	this->x += v.getX();
+	this->y += v.getY();
+
+	/* Check current movement */
+	if (movingStraight)
+	{
+		if (Tank::getDirection() == Tank::FORWARD)
+		{
+			if (yGoal <= y)
+			{
+				stop();
+			}
+		}
+	}
+}
+
+float SRL::Rover::getCorrectionSpeed(float x)
+{
+	return (0 - 0.19 * x + 99.64);
 }
 
 float SRL::Rover::getDirection(void)
@@ -191,4 +221,44 @@ double SRL::Rover::getY(void)
 void SRL::Rover::setY(double y)
 {
 	this->y = y;
+}
+
+void SRL::Rover::setAccelGyro(AccelGyro* accelGyro)
+{
+	this->accelGyro = accelGyro;
+}
+
+void SRL::Rover::setLeftEncoder(Encoder* leftEncoder)
+{
+	this->leftEncoder = leftEncoder;
+}
+
+void SRL::Rover::setRightEncoder(Encoder* rightEncoder)
+{
+	this->rightEncoder = rightEncoder;
+}
+
+SRL::AccelGyro* SRL::Rover::getAccelGyro(void)
+{
+	return accelGyro;
+}
+
+SRL::Encoder* SRL::Rover::getLeftEncoder(void)
+{
+	return leftEncoder;
+}
+
+SRL::Encoder* SRL::Rover::getRightEncoder(void)
+{
+	return rightEncoder;
+}
+
+SRL::Motor* SRL::Rover::getLeftMotor(void)
+{
+	return leftMotor;
+}
+
+SRL::Motor* SRL::Rover::getRightMotor(void)
+{
+	return rightMotor;
 }

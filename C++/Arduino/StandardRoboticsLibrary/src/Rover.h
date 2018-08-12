@@ -30,23 +30,24 @@
 #include <Tank.h>
 #include <Component.h>
 #include <stdarg.h>
+#include <Encoder.h>
+#include <AccelGyro.h>
 #include <vector>
+#include <Statistics.h>
 
 namespace SRL
 {
 	class Rover : protected Tank
 	{
 		public:
+			/* Constructors */
 			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor,
 				 double x = 0.0, double y = 0.0, float direction = 0.0f);
 
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor,
-				 double x, double y, float direction, unsigned int argc, ...);
-
-			Rover(SRL::Motor* leftMotor, SRL::Motor* rightMotor, unsigned int argc, ...);
-
+			/* Destructor */
 			~Rover(void);
 
+			/* Initializer */
 			void initialize(void);
 
 			/* Movement commands */
@@ -58,6 +59,10 @@ namespace SRL
 			void turnTo(SRL::Angle dir);
 			void stop(void);
 
+			/* Timer methods */
+			void correctMotors(void);
+			void updatePosition(void);
+
 			/* Getters & setters */
 			float getDirection(void);
 			void setDirection(float direction);
@@ -66,27 +71,43 @@ namespace SRL
 			void setX(double x);
 			void setY(double y);
 
+			void setAccelGyro(AccelGyro* accelGyro);
+			void setLeftEncoder(Encoder* leftEncoder);
+			void setRightEncoder(Encoder* rightEncoder);
+
+			AccelGyro* getAccelGyro(void);
+			Encoder* getLeftEncoder(void);
+			Encoder* getRightEncoder(void);
+			Motor* getRightMotor(void);
+			Motor* getLeftMotor(void);
+
 			/* Enums */
-			enum consts
+			enum Intervals
 			{
-				GYROSCOPE_INTERVAL = 100,
-				UPDATE_POSITION_INTERAL = 500
+				UPDATE_POSITION_INTERVAL = 235000,
+				CORRECT_MOTORS_INTERVAL = 250
 			};
 
 		protected:
-			void updateDirection(void);
-			void updatePosition(void);
-
+			/* Position related fields */
 			double x, y;
 			SRL::Angle direction;
-			std::vector<SRL::Component*> components;
 
-		private:
+			/* Component related fields */
+			SRL::Encoder* leftEncoder;
+			SRL::Encoder* rightEncoder;
+			SRL::AccelGyro* accelGyro;
+
+			/* Movement related fields */
 			bool turning = false;
 			SRL::Angle turnGoal;
 
 			bool movingStraight = false;
 			double xGoal, yGoal;
+
+	 private:
+			/* Movement related methods */
+			float getCorrectionSpeed(float x);
 	};
 }
 #endif
