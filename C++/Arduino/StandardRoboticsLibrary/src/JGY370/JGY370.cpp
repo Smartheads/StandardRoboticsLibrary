@@ -31,10 +31,10 @@ SRL::JGY370::JGY370(unsigned int forwardPin, unsigned int backwardPin, unsigned 
 
 long SRL::JGY370::convertSteps(double cm)
 {
-  return ((long) CM_IN_STEPS * cm);
+  return CM_IN_STEPS * cm;
 }
 
 double SRL::JGY370::convertCm(long steps)
 {
-  return ((double) steps * STEP_IN_CM);
+  return ((double) steps) / CM_IN_STEPS;
 }

@@ -34,6 +34,9 @@ SRL::Rover::~Rover(void)
 {
 	delete leftMotor;
 	delete rightMotor;
+	delete leftEncoder;
+	delete rightEncoder;
+	delete accelGyro;
 }
 
 /**
@@ -54,7 +57,7 @@ void SRL::Rover::initialize(void)
 
 void SRL::Rover::goTo(double x, double y)
 {
-	SRL::Vector v(x - this->x, y - this->y);
+	SRL::Vector v = Vector(x - this->x, y - this->y);
 	turnTo(v.getAngle());
 	forward(v.getLength());
 }
@@ -75,45 +78,49 @@ void SRL::Rover::turnTo(SRL::Angle dir)
 
 void SRL::Rover::forward(double distance)
 {
-	SRL::Vector g(direction, distance);
+	// Calculate target position
+	SRL::Vector g = Vector(direction, distance);
 	xGoal = g.getX() + x;
 	yGoal = g.getY() + y;
 
+	// Command movement
 	Tank::forwards();
 	Tank::start();
-
 	movingStraight = true;
 }
 
 void SRL::Rover::backward(double distance)
 {
-	SRL::Vector g(direction, distance * -1);
+	// Calculate target position
+	SRL::Vector g = Vector(direction, distance * -1);
 	xGoal = g.getX() + x;
 	yGoal = g.getY() + y;
 
+	// Command movement
 	Tank::backwards();
 	Tank::start();
-
 	movingStraight = true;
 }
 
 void SRL::Rover::turnRight(double amount)
 {
+	// Calculate target direction
 	turnGoal =  SRL::Angle(direction.getSize() + amount);
 
-	faceRight();
-	start();
-
+	// Command movement
+	Tank::faceRight();
+	Tank::start();
 	turning = true;
 }
 
 void SRL::Rover::turnLeft(double amount)
 {
+	// Calculate target direction
 	turnGoal =  SRL::Angle(direction.getSize() + amount * -1);
 
-	faceLeft();
-	start();
-
+	// Command movement
+	Tank::faceLeft();
+	Tank::start();
 	turning = true;
 }
 
@@ -131,24 +138,42 @@ void SRL::Rover::correctMotors(void)
 {
 	if (movingStraight)
 	{
+		long l = leftEncoder->read();
+		long r = rightEncoder->read();
+
 		if (Tank::getDirection() == Tank::FORWARD)
 		{
-			long l = leftEncoder->read();
-			long r = rightEncoder->read();
-
 			if (l > r)
 			{
-				leftMotor->setSpeed(getCorrectionSpeed(l-r));
+				leftMotor->setSpeed(getCorrectionSpeed(abs(l-r)));
 				rightMotor->setSpeed(100);
 			}
 			else if (l != r)
 			{
-				rightMotor->setSpeed(getCorrectionSpeed(r-l));
+				rightMotor->setSpeed(getCorrectionSpeed(abs(r-l)));
 				leftMotor->setSpeed(100);
 			}
 			else
 			{
 				setUnifiedSpeed(100);
+			}
+		}
+		else
+		{
+			if (l < r)
+			{
+				leftMotor->setSpeed(getCorrectionSpeed(abs(l-r)));
+				rightMotor->setSpeed(100);
+			}
+			else if (l != r)
+			{
+				rightMotor->setSpeed(getCorrectionSpeed(abs(r-l)));
+				leftMotor->setSpeed(100);
+			}
+			else
+			{
+				leftMotor->setSpeed(100);
+				rightMotor->setSpeed(100);
 			}
 		}
 	}
@@ -160,10 +185,9 @@ void SRL::Rover::correctMotors(void)
 void SRL::Rover::updatePosition(void)
 {
 	/* Get traveled distance */
-	double* e = new double[2];
-	e[0] = leftEncoder->readCm();
-	e[1] = rightEncoder->readCm();
-	double d = getAverage(2, e);
+	double le = leftEncoder->readCm();
+	double re = rightEncoder->readCm();
+	double d = (le + re) / 2.0;
 
 	leftEncoder->write(0);
 	rightEncoder->write(0);
@@ -171,20 +195,22 @@ void SRL::Rover::updatePosition(void)
 	/* Get direction */
 
 	/* Combine data with current position */
-	SRL::Vector v(getDirection(), d);
+	SRL::Vector v = Vector(getDirection(), d);
 	this->x += v.getX();
 	this->y += v.getY();
 
 	/* Check current movement */
 	if (movingStraight)
 	{
-		if (Tank::getDirection() == Tank::FORWARD)
+		if (SRL::equals(x, xGoal, PRECISION) && SRL::equals(y, yGoal, PRECISION))
 		{
-			if (yGoal <= y)
-			{
-				stop();
-			}
+			stop();
 		}
+	}
+
+	if (turning)
+	{
+
 	}
 }
 

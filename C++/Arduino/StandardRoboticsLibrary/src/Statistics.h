@@ -57,6 +57,12 @@ namespace SRL
 
     return sum / argc;
   }
+
+  template <typename number>
+  bool equals(number a, number b, number v = ((number) 0))
+  {
+    return a <= (b + v) && a >= (b - v);
+  }
 }
 
 #endif
