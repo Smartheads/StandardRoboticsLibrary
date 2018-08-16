@@ -35,9 +35,6 @@ namespace SRL
   class Accelerometer : virtual public SRL::Component
   {
     public:
-      Accelerometer(String name);
-      virtual void initialize(void) = 0;
-
       virtual int16_t getRawAccelX(void) = 0;
       virtual int16_t getRawAccelY(void) = 0;
       virtual int16_t getRawAccelZ(void) = 0;

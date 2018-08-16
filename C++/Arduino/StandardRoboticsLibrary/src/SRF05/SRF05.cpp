@@ -23,7 +23,7 @@
 */
 #include <SRF05.h>
 
-SRL::SRF05::SRF05(uint8_t triggerPin, uint8_t echoPin, double maxDistanceCm): Sonar(triggerPin, echoPin, convertUs(maxDistanceCm)), Component(name)
+SRL::SRF05::SRF05(uint8_t triggerPin, uint8_t echoPin, double maxDistanceCm): Sonar(triggerPin, echoPin, convertUs(maxDistanceCm)), Component(SRF05_COMPONENT_NAME, Component::SONAR)
 {
 
 }

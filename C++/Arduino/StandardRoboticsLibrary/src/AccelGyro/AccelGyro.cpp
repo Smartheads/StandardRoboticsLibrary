@@ -21,76 +21,30 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include <Vector.h>
+#include <AccelGyro.h>
 
-SRL::Vector::Vector(double x, double y)
+SRL::AccelGyro::AccelGyro(float aC, float gC)
 {
-	this->x = x;
-	this->y = y;
-	updateLength();
+	this->aC = aC;
+	this->gC = gC;
 }
 
-SRL::Vector::Vector(SRL::Angle direction, double length)
+float SRL::AccelGyro::getAccelCoeff(void)
 {
-	this->x = (length * cos(((90 - direction.getSize()) * PI) / 180));
-	this->y = (length * cos((direction.getSize() * PI) / 180));
+	return aC;
 }
 
-SRL::Vector SRL::Vector::addition(Vector a, Vector b)
+void SRL::AccelGyro::setAccelCoeff(float aC)
 {
-	return Vector(a.getX() + b.getX(), a.getY() + b.getY());
+	this->aC = aC;
 }
 
-SRL::Vector SRL::Vector::addition(int argc, Vector * argv)
+float SRL::AccelGyro::getGyroCoeff(void)
 {
-	Vector v(0, 0);
-
-	for (int i = 0; i < argc; i++)
-	{
-		v = v.add(*(argv + i));
-	}
-
-	return v;
+	return gC;
 }
 
-SRL::Vector SRL::Vector::add(Vector b)
+void SRL::AccelGyro::setGyroCoeff(float gC)
 {
-	return Vector::addition(*this, b);
-}
-
-double SRL::Vector::getX(void)
-{
-	return x;
-}
-
-double SRL::Vector::getY(void)
-{
-	return y;
-}
-
-double SRL::Vector::getLength(void)
-{
-	return length;
-}
-
-SRL::Angle SRL::Vector::getAngle(void)
-{
-	return SRL::Angle((sinh(x / length) * PI) / 180);
-}
-
-void SRL::Vector::setX(double x)
-{
-	this->x = x;
-	updateLength();
-}
-
-void SRL::Vector::setY(double y)
-{
-	this->y = y;
-	updateLength();
-}
-
-void SRL::Vector::updateLength()
-{
-	length = sqrt(x*x + y*y);
+	this->gC = gC;
 }

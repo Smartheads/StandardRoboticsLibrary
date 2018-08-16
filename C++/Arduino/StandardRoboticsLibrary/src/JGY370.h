@@ -21,50 +21,26 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _SONAR_H
-#define _SONAR_H
+#ifndef _JGY370
+#define _JGY370
 
 #include <SRL.h>
-#include <Component.h>
+#include <Encoder.h>
+#include <Motor.h>
 
-#define NO_ECHO 0
-#define PING_MEDIAN_DELAY 29000
+#define JGY370_COMPONENT_NAME "JGY370"
+#define STEP_IN_CM 0.00051
+#define CM_IN_STEPS 1176.470588
 
 namespace SRL
 {
-  class Sonar : public virtual SRL::Component
+  class JGY370 : public SRL::Encoder, public SRL::Motor
   {
     public:
-      Sonar(uint8_t triggerPin, uint8_t echoPin, unsigned long maxDistanceCm = 22770);
+      JGY370(unsigned int forwardPin, unsigned int backwardPin, unsigned int pwmPin, int c1, unsigned int c2);
 
-      /* Get data from sensor */
-      virtual unsigned long ping(void) = 0;
-      double pingCm(void);
-      double pingMm(void);
-      unsigned long pingMedian(unsigned int interations = 5);
-      double pingMedianCm(unsigned int interations = 5);
-      double pingMedianMm(unsigned int interations = 5);
-
-      virtual double convertCm(unsigned long us) = 0;
-      double convertMm(unsigned long us);
-      virtual unsigned long convertUs(double cm) = 0;
-
-
-      /* Getters & setters */
-      uint8_t getTriggerPin(void);
-      void setTriggerPin(uint8_t triggerPin);
-      uint8_t getEchoPin(void);
-      void setEchoPin(uint8_t echoPin);
-
-      double getMaxDistance(void);
-      void setMaxDistance(double cm);
-      void setMaxDistance(unsigned long us);
-
-    protected:
-      uint8_t triggerPin;
-      uint8_t echoPin;
-
-      unsigned long maxDistance;
+      long convertSteps(double cm);
+      double convertCm(long steps);
   };
 }
 

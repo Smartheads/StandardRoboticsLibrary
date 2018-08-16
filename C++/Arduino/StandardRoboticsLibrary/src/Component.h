@@ -31,19 +31,32 @@ namespace SRL
   class Component
   {
     public:
-      Component(String name);
+      Component(void);
+      Component(String name, unsigned int type);
 
       void initialize(void);
 
       /* Getters & setters: */
       unsigned int getId(void);
       String getName(void);
+      unsigned int getType(void);
 
       /* Static variables */
       static unsigned int lastId;
 
+      /* Enums */
+      enum Types
+      {
+        ROTARY_ENCODER = 1,
+        ACCELEROMETER = 2,
+        GYROSCOPE = 3,
+        ACCEL_GYRO = 4,
+        SONAR = 5
+      };
+
     protected:
       String name;
+      unsigned int type;
       unsigned int id;
   };
 }

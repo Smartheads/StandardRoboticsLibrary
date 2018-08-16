@@ -21,55 +21,38 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _GYROSCOPE_H
-#define _GYROSCOPE_H
+#ifndef _ACCELGYRO_H
+#define _ACCELGYRO_H
 
 #include <SRL.h>
 #include <Component.h>
-#include <Statistics.h>
-
-#define GYRO_CALIBRATION_I 200
+#include <Accelerometer.h>
+#include <Gyroscope.h>
 
 namespace SRL
 {
-  class Gyroscope : virtual public SRL::Component
+  class AccelGyro : public SRL::Accelerometer, public SRL::Gyroscope, public virtual SRL::Component
   {
     public:
+      AccelGyro(float aC, float gC);
+
+      virtual int16_t getRawAccelX(void) = 0;
+      virtual int16_t getRawAccelY(void) = 0;
+      virtual int16_t getRawAccelZ(void) = 0;
+
       virtual int16_t getRawGyroX(void) = 0;
-			virtual int16_t getRawGyroY(void) = 0;
-			virtual int16_t getRawGyroZ(void) = 0;
-
-      int16_t getRawGyroXMedian(unsigned int iterations = 5);
-      int16_t getRawGyroYMedian(unsigned int iterations = 5);
-      int16_t getRawGyroZMedian(unsigned int iterations = 5);
-
-      double getGyroX(void);
-			double getGyroY(void);
-			double getGyroZ(void);
-
-      double getGyroXMedian(unsigned int iterations = 5);
-      double getGyroYMedian(unsigned int iterations = 5);
-      double getGyroZMedian(unsigned int iterations = 5);
+      virtual int16_t getRawGyroY(void) = 0;
+      virtual int16_t getRawGyroZ(void) = 0;
 
       /* Getters & setters */
-      int16_t getGyroXOffset(void);
-			void setGyroXOffset(int16_t offset);
-			int16_t getGyroYOffset(void);
-			void setGyroYOffset(int16_t offset);
-			int16_t getGyroZOffset(void);
-			void setGyroZOffset(int16_t offset);
-
-      void setGyroOffsets(int16_t x, int16_t y, int16_t z);
-      void calcGyroOffsets(bool console = false, unsigned int interations = 5);
-
-      virtual bool setGyroSensitivity(uint8_t setting) = 0;
+      float getAccelCoeff(void);
+			void setAccelCoeff(float aC);
+			float getGyroCoeff(void);
+			void setGyroCoeff(float gC);
 
     protected:
-      int16_t gyroXOffset;
-			int16_t gyroYOffset;
-			int16_t gyroZOffset;
-
-      double gyroSensitivity;
+      float aC;
+      float gC;
   };
 }
 

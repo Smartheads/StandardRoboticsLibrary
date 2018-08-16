@@ -21,76 +21,20 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#include <Vector.h>
+#include <JGY370.h>
 
-SRL::Vector::Vector(double x, double y)
+SRL::JGY370::JGY370(unsigned int forwardPin, unsigned int backwardPin, unsigned int pwmPin, int c1, unsigned int c2)
+    : Encoder(c1, c2), Motor(forwardPin, backwardPin, pwmPin), Component(JGY370_COMPONENT_NAME, Component::ROTARY_ENCODER)
 {
-	this->x = x;
-	this->y = y;
-	updateLength();
+
 }
 
-SRL::Vector::Vector(SRL::Angle direction, double length)
+long SRL::JGY370::convertSteps(double cm)
 {
-	this->x = (length * cos(((90 - direction.getSize()) * PI) / 180));
-	this->y = (length * cos((direction.getSize() * PI) / 180));
+  return ((long) CM_IN_STEPS * cm);
 }
 
-SRL::Vector SRL::Vector::addition(Vector a, Vector b)
+double SRL::JGY370::convertCm(long steps)
 {
-	return Vector(a.getX() + b.getX(), a.getY() + b.getY());
-}
-
-SRL::Vector SRL::Vector::addition(int argc, Vector * argv)
-{
-	Vector v(0, 0);
-
-	for (int i = 0; i < argc; i++)
-	{
-		v = v.add(*(argv + i));
-	}
-
-	return v;
-}
-
-SRL::Vector SRL::Vector::add(Vector b)
-{
-	return Vector::addition(*this, b);
-}
-
-double SRL::Vector::getX(void)
-{
-	return x;
-}
-
-double SRL::Vector::getY(void)
-{
-	return y;
-}
-
-double SRL::Vector::getLength(void)
-{
-	return length;
-}
-
-SRL::Angle SRL::Vector::getAngle(void)
-{
-	return SRL::Angle((sinh(x / length) * PI) / 180);
-}
-
-void SRL::Vector::setX(double x)
-{
-	this->x = x;
-	updateLength();
-}
-
-void SRL::Vector::setY(double y)
-{
-	this->y = y;
-	updateLength();
-}
-
-void SRL::Vector::updateLength()
-{
-	length = sqrt(x*x + y*y);
+  return ((double) steps * STEP_IN_CM);
 }

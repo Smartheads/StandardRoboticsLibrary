@@ -23,11 +23,6 @@
 */
 #include <Gyroscope.h>
 
-SRL::Gyroscope::Gyroscope(String name) : Component(name)
-{
-
-}
-
 /**
 *	Set the gyroscope's offsets.
 *
