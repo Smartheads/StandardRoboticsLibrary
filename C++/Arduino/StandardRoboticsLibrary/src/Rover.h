@@ -25,15 +25,23 @@
 #define _ROVER_h
 
 #include <SRL.h>
+
+// Math
 #include <Angle.h>
 #include <Vector.h>
+#include <Statistics.h>
+
+// Models
 #include <Tank.h>
-#include <Component.h>
-#include <stdarg.h>
+
+// Components
 #include <Encoder.h>
 #include <AccelGyro.h>
+
+// Standard Template Library
 #include <vector>
-#include <Statistics.h>
+
+#define PRECISION 0.25 // Precision of movement methods
 
 namespace SRL
 {
@@ -59,7 +67,7 @@ namespace SRL
 			void turnTo(SRL::Angle dir);
 			void stop(void);
 
-			/* Timer methods */
+			/* ISRs */
 			void correctMotors(void);
 			void updatePosition(void);
 
@@ -84,7 +92,7 @@ namespace SRL
 			/* Enums */
 			enum Intervals
 			{
-				UPDATE_POSITION_INTERVAL = 500000,
+				UPDATE_POSITION_INTERVAL = 20000,
 				CORRECT_MOTORS_INTERVAL = 500
 			};
 
@@ -94,9 +102,9 @@ namespace SRL
 			SRL::Angle direction;
 
 			/* Component related fields */
-			SRL::Encoder* leftEncoder;
-			SRL::Encoder* rightEncoder;
-			SRL::AccelGyro* accelGyro;
+			SRL::Encoder* leftEncoder = NULL;
+			SRL::Encoder* rightEncoder = NULL;
+			SRL::AccelGyro* accelGyro = NULL;
 
 			/* Movement related fields */
 			bool turning = false;
