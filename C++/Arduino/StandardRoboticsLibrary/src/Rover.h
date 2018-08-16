@@ -84,8 +84,8 @@ namespace SRL
 			/* Enums */
 			enum Intervals
 			{
-				UPDATE_POSITION_INTERVAL = 235000,
-				CORRECT_MOTORS_INTERVAL = 250
+				UPDATE_POSITION_INTERVAL = 500000,
+				CORRECT_MOTORS_INTERVAL = 500
 			};
 
 		protected:

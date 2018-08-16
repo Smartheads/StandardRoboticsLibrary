@@ -29,7 +29,7 @@
 #include <Motor.h>
 
 #define JGY370_COMPONENT_NAME "JGY370"
-#define STEP_IN_CM 0.00051
+#define STEP_IN_CM 0.00085
 #define CM_IN_STEPS 1176.470588
 
 namespace SRL

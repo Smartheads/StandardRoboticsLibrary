@@ -160,10 +160,9 @@ void SRL::Rover::correctMotors(void)
 void SRL::Rover::updatePosition(void)
 {
 	/* Get traveled distance */
-	double* e = new double[2];
-	e[0] = leftEncoder->readCm();
-	e[1] = rightEncoder->readCm();
-	double d = getAverage(2, e);
+	double le = leftEncoder->readCm();
+	double re = rightEncoder->readCm();
+	double d = (le + re) / 2.0;
 
 	leftEncoder->write(0);
 	rightEncoder->write(0);
