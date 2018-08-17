@@ -25,13 +25,13 @@
 #define _ACCELGYRO_H
 
 #include <SRL.h>
-#include <Component.h>
 #include <Accelerometer.h>
 #include <Gyroscope.h>
+#include <Angle.h>
 
 namespace SRL
 {
-  class AccelGyro : public SRL::Accelerometer, public SRL::Gyroscope, public virtual SRL::Component
+  class AccelGyro : public virtual SRL::Accelerometer, public virtual SRL::Gyroscope
   {
     public:
       AccelGyro(float aC, float gC);
@@ -44,15 +44,26 @@ namespace SRL
       virtual int16_t getRawGyroY(void) = 0;
       virtual int16_t getRawGyroZ(void) = 0;
 
+      void update(unsigned int sampleSize = 1);
+      void update(unsigned long deltaT, unsigned int sampleSize = 1);
+
       /* Getters & setters */
       float getAccelCoeff(void);
 			void setAccelCoeff(float aC);
 			float getGyroCoeff(void);
 			void setGyroCoeff(float gC);
 
+      float getAngleX(void);
+      float getAngleY(void);
+      float getAngleZ(void);
+      void setAngleX(float angle);
+      void setAngleY(float angle);
+      void setAngleZ(float angle);
+
     protected:
       float aC;
       float gC;
+      Angle angleX, angleY, angleZ;
   };
 }
 
