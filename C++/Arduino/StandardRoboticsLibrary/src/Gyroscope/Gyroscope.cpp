@@ -47,7 +47,7 @@ void SRL::Gyroscope::calcGyroOffsets(bool console, unsigned int iterations)
 {
 	if (console)
 	{
-		Serial.println("Calculating gyroscope");
+		Serial.println("Calibrating gyroscope.");
 	}
 	for (int x = 0; x < iterations; x++)
 	{
