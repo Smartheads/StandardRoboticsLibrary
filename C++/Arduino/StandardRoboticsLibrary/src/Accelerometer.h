@@ -28,7 +28,7 @@
 #include <Component.h>
 #include <Statistics.h>
 
-#define ACCEL_CALIBRATION_I 200
+#define ACCEL_CALIBRATION_I 25
 
 namespace SRL
 {
@@ -63,7 +63,7 @@ namespace SRL
 
       virtual bool setAccelSensitivity(uint8_t setting) = 0;
 
-      void calcAccelOffsets(uint8_t orientation = Y_UP, bool console = false, unsigned int iterations = 5);
+      void calcAccelOffsets(uint8_t orientation = Y_UP, bool console = false, unsigned int iterations = 50);
 
       enum Orientation
       {

@@ -28,7 +28,7 @@
 #include <Component.h>
 #include <Statistics.h>
 
-#define GYRO_CALIBRATION_I 200
+#define GYRO_CALIBRATION_I 25
 
 namespace SRL
 {
@@ -60,7 +60,7 @@ namespace SRL
 			void setGyroZOffset(int16_t offset);
 
       void setGyroOffsets(int16_t x, int16_t y, int16_t z);
-      void calcGyroOffsets(bool console = false, unsigned int interations = 5);
+      void calcGyroOffsets(bool console = false, unsigned int interations = 50);
 
       virtual bool setGyroSensitivity(uint8_t setting) = 0;
 
