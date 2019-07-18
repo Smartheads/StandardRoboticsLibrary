@@ -34,6 +34,7 @@ namespace SRL
   class AccelGyro : public virtual SRL::Accelerometer, public virtual SRL::Gyroscope
   {
     public:
+      AccelGyro(void);
       AccelGyro(float aC, float gC);
 
       virtual int16_t getRawAccelX(void) = 0;

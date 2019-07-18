@@ -32,6 +32,13 @@ SRL::AccelGyro::AccelGyro(float aC, float gC)
 	angleZ = Angle();
 }
 
+SRL::AccelGyro::AccelGyro(void)
+{
+	angleX = Angle();
+	angleY = Angle();
+	angleZ = Angle();
+}
+
 /**
 *	Update the accel gyro's angles.
 *
