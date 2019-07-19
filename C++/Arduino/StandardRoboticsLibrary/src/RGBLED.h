@@ -1,18 +1,18 @@
 /*
 * MIT License
 *
-* Copyright (c) 2018 Robert Hutter
-*
+* Copyright (c) 2019 Robert Hutter
+* 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-*
+* 
 * The above copyright notice and this permission notice shall be included in all
 * copies or substantial portions of the Software.
-*
+* 
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -20,47 +20,62 @@
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
+*
+* RGBLED.h - Header file of RGBLED.cpp. Contains class and function prototypes
+*   for RGB capable light emitting diodes.
+*
 */
-#ifndef _COMPONENT_H
-#define _COMPONENT_H
+
+#ifndef RGBLED_H
+#define RGBLED_H
 
 #include <SRL.h>
+#include <Component.h>
+
+#define RGBLED_COMPONENT_NAME "RGBLED"
+
+#define RED color {255, 0, 255}
+#define GREEN color {0, 255, 0}
+#define BLUE color {0, 0, 255}
+#define WHITE color {255, 255, 255}
+
+#define ON true
+#define OFF false
 
 namespace SRL
 {
-  class Component
-  {
-    public:
-      Component(void);
-      Component(String name, unsigned int type);
 
-      void initialize(void);
+	typedef unsigned char byte;
 
-      /* Getters & setters: */
-      unsigned int getId(void);
-      String getName(void);
-      unsigned int getType(void);
+	typedef struct
+	{
+		byte red;
+		byte green;
+		byte blue;
+	} color;
 
-      /* Static variables */
-      static unsigned int lastId;
-
-      /* Enums */
-      typedef enum
-      {
-        ROTARY_ENCODER = 1,
-        ACCELEROMETER = 2,
-        GYROSCOPE = 3,
-        ACCEL_GYRO = 4,
-        SONAR = 5,
-        LIGHT = 6,
-        SOUND = 7
-      } types;
-
-    protected:
-      String name;
-      unsigned int type;
-      unsigned int id;
-  };
+	class rgbled : public Component
+	{
+		public:
+			rgbled(uint8_t redpin, uint8_t greedpin, uint8_t bluepin);
+			~rgbled();
+		
+			void setColor(byte red, byte green, byte blue);
+			void setColor(color ledcol);
+			color getColor(void);
+		
+			void turnOff(void);
+			void turnOn(void);
+			void setState(bool state);
+			bool getState(void);
+		
+		private:
+			color* const ledcol = new color;
+			uint8_t* const redpin = new uint8_t;
+			uint8_t* const greenpin = new uint8_t;
+			uint8_t* const bluepin = new uint8_t;
+			bool* const ledstate = new bool;
+	};
 }
 
 #endif
