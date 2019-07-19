@@ -29,24 +29,30 @@
 #define BUZZER_H
 
 #include <SRL.h>
+#include <Component.h>
+
+#define BUZZER_COMPONENT_NAME "buzzer"
 
 #define ON true
 #define OFF false
 
-class Buzzer
+namespace SRL
 {
-	public:
-		Buzzer(uint8_t pin);
-		~Buzzer();
+	class Buzzer : public Component
+	{
+		public:
+			Buzzer(uint8_t pin);
+			~Buzzer();
 		
-		void turnOff(void);
-		void turnOn(void);
-		void setState(bool state);
-		bool getState(void);
+			void turnOff(void);
+			void turnOn(void);
+			void setState(bool state);
+			bool getState(void);
 		
-	private:
-		uint8_t* const pin = new uint8_t;
-		bool* const state = new bool;
-};
+		private:
+			uint8_t* const pin = new uint8_t;
+			bool* const state = new bool;
+	};
+}
 
 #endif

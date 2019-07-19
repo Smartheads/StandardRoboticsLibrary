@@ -45,14 +45,16 @@ namespace SRL
       static unsigned int lastId;
 
       /* Enums */
-      enum Types
+      typedef enum
       {
         ROTARY_ENCODER = 1,
         ACCELEROMETER = 2,
         GYROSCOPE = 3,
         ACCEL_GYRO = 4,
-        SONAR = 5
-      };
+        SONAR = 5,
+        LIGHT = 6,
+        SOUND = 7
+      } types;
 
     protected:
       String name;

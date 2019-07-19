@@ -32,7 +32,7 @@
 *
 *	@param pin
 */
-Buzzer::Buzzer(uint8_t pin)
+SRL::Buzzer::Buzzer(uint8_t pin) : Component(BUZZER_COMPONENT_NAME, Component::SOUND)
 {
 	*this->pin = pin;
 	pinMode(pin, OUTPUT);
@@ -44,7 +44,7 @@ Buzzer::Buzzer(uint8_t pin)
 *	Destructor for the class Buzzer.
 *
 */
-Buzzer::~Buzzer()
+SRL::Buzzer::~Buzzer()
 {
 	delete pin;
 	delete state;
@@ -54,7 +54,7 @@ Buzzer::~Buzzer()
 *	Turns the buzzer off.
 *
 */
-void Buzzer::turnOff(void)
+void SRL::Buzzer::turnOff(void)
 {
 	*state = OFF;
 	digitalWrite(*pin, LOW);
@@ -64,7 +64,7 @@ void Buzzer::turnOff(void)
 *	Turns the buzzer on.
 *
 */
-void Buzzer::turnOn(void)
+void SRL::Buzzer::turnOn(void)
 {
 	*state = ON;
 	digitalWrite(*pin, HIGH);
@@ -74,7 +74,7 @@ void Buzzer::turnOn(void)
 *	Sets the state of the buzzer. ON = true, OFF = false.
 *
 */
-void Buzzer::setState(bool state)
+void SRL::Buzzer::setState(bool state)
 {
 	if (state)
 		turnOn();
@@ -86,7 +86,7 @@ void Buzzer::setState(bool state)
 *	Returns the state of the buzzer. True = ON, false = OFF.
 *
 */
-bool Buzzer::getState(void)
+bool SRL::Buzzer::getState(void)
 {
 	return *state;
 }

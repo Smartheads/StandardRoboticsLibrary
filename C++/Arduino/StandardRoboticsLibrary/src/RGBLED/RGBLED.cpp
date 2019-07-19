@@ -35,7 +35,7 @@
 *	@param greenpin
 *	@param bluepin
 */
-rgbled::rgbled(uint8_t redpin, uint8_t greenpin, uint8_t bluepin)
+SRL::rgbled::rgbled(uint8_t redpin, uint8_t greenpin, uint8_t bluepin) : Component(RGBLED_COMPONENT_NAME, Component::LIGHT)
 {
 	*this->redpin = redpin;
 	*this->greenpin = greenpin;
@@ -53,7 +53,7 @@ rgbled::rgbled(uint8_t redpin, uint8_t greenpin, uint8_t bluepin)
 *	Destructor for the class RGB LED.
 *
 */
-rgbled::~rgbled()
+SRL::rgbled::~rgbled()
 {
 	delete ledcol;
 	delete redpin;
@@ -69,7 +69,7 @@ rgbled::~rgbled()
 *	@param blue
 *
 */
-void rgbled::setColor(byte red, byte green, byte blue)
+void SRL::rgbled::setColor(byte red, byte green, byte blue)
 {
 	setColor(color {red, green, blue});
 }
@@ -79,7 +79,7 @@ void rgbled::setColor(byte red, byte green, byte blue)
 *
 *	@param ledcol
 */
-void rgbled::setColor(color ledcol)
+void SRL::rgbled::setColor(color ledcol)
 {
 	(*this->ledcol).red = ledcol.red;
 	(*this->ledcol).green = ledcol.green;
@@ -94,7 +94,7 @@ void rgbled::setColor(color ledcol)
 *	Turns the LED off.
 *
 */
-void rgbled::turnOff(void)
+void SRL::rgbled::turnOff(void)
 {
 	*ledstate = OFF;
 	digitalWrite(*redpin, LOW);
@@ -106,7 +106,7 @@ void rgbled::turnOff(void)
 *	Turns the led on.
 *
 */
-void rgbled::turnOn(void)
+void SRL::rgbled::turnOn(void)
 {
 	*ledstate = ON;
 	setColor(*ledcol);
@@ -116,7 +116,7 @@ void rgbled::turnOn(void)
 *	Returns the state of the led. True = ON, false = OFF.
 *
 */
-bool rgbled::getState(void)
+bool SRL::rgbled::getState(void)
 {
 	return *ledstate;
 }
@@ -125,7 +125,7 @@ bool rgbled::getState(void)
 *	Sets the state of the led. True = ON, false = OFF.
 *
 */
-void rgbled::setState(bool state)
+void SRL::rgbled::setState(bool state)
 {
 	*ledstate = state;
 	if (state)
