@@ -34,10 +34,10 @@
 
 #define RGBLED_COMPONENT_NAME "RGBLED"
 
-#define RED color {255, 0, 255}
-#define GREEN color {0, 255, 0}
-#define BLUE color {0, 0, 255}
-#define WHITE color {255, 255, 255}
+#define RED SRL::color {255, 0, 255}
+#define GREEN SRL::color {0, 255, 0}
+#define BLUE SRL::color {0, 0, 255}
+#define WHITE SRL::color {255, 255, 255}
 
 #define ON true
 #define OFF false

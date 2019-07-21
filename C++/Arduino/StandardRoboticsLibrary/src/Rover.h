@@ -39,7 +39,7 @@
 #include <AccelGyro.h>
 
 // Standard Template Library
-#include <vector>
+#include <Vector.h>
 
 #define PRECISION 0.25 // Precision of movement methods
 
