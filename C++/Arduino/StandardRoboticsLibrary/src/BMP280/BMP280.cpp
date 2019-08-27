@@ -21,47 +21,35 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _COMPONENT_H
-#define _COMPONENT_H
 
-#include <SRL.h>
+#include <BMP280.h>
 
-namespace SRL
+/**
+*	Constructor of class BMP280.
+*
+*	@param addr The I2C address of the device. Defualt 0x78.
+*/
+SRL::BMP280::BMP280(uint8_t addr) : Component(BMP280_COMPONENT_NAME, BAROMETER), I2CDevice(addr)
 {
-  class Component
-  {
-    public:
-      Component(void);
-      Component(String name, unsigned int type);
-
-      void initialize(void);
-
-      /* Getters & setters: */
-      unsigned int getId(void);
-      String getName(void);
-      unsigned int getType(void);
-
-      /* Static variables */
-      static unsigned int lastId;
-
-      /* Enums */
-      typedef enum
-      {
-        ROTARY_ENCODER = 1,
-        ACCELEROMETER = 2,
-        GYROSCOPE = 3,
-        ACCEL_GYRO = 4,
-        SONAR = 5,
-        LIGHT = 6,
-        SOUND = 7,
-		BAROMETER = 8
-      } types;
-
-    protected:
-      String name;
-      unsigned int type;
-      unsigned int id;
-  };
+	
 }
 
-#endif
+/**
+*	Destructor of class BMP280
+*
+*/
+SRL::BMP280::~BMP280(void)
+{
+	
+}
+
+/**
+*	Initializer method for class BMP280.
+*
+*	@return bool True if successfull.
+*/
+bool SRL::BMP280::initialize(void)
+{
+	Wire.begin();
+	
+}

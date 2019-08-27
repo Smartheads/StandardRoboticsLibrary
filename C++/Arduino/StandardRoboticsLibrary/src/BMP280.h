@@ -21,47 +21,26 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _COMPONENT_H
-#define _COMPONENT_H
+#ifndef SRL_BMP_180
+#define SRL_BMP_180
 
 #include <SRL.h>
+#include <Component.h>
+#include <I2C.h>
+
+#define BMP280_COMPONENT_NAME "BMP280"
+#define BMP280_DEFAULT_ADDRESS 0x78
 
 namespace SRL
 {
-  class Component
-  {
-    public:
-      Component(void);
-      Component(String name, unsigned int type);
-
-      void initialize(void);
-
-      /* Getters & setters: */
-      unsigned int getId(void);
-      String getName(void);
-      unsigned int getType(void);
-
-      /* Static variables */
-      static unsigned int lastId;
-
-      /* Enums */
-      typedef enum
-      {
-        ROTARY_ENCODER = 1,
-        ACCELEROMETER = 2,
-        GYROSCOPE = 3,
-        ACCEL_GYRO = 4,
-        SONAR = 5,
-        LIGHT = 6,
-        SOUND = 7,
-		BAROMETER = 8
-      } types;
-
-    protected:
-      String name;
-      unsigned int type;
-      unsigned int id;
-  };
+	class BMP280 : public SRL::Component, public SRL::I2CDevice
+	{
+		public:
+			BMP280(uint8_t addr = BMP280_DEFAULT_ADDRESS);
+			~BMP280(void);
+			
+			void initialize(void);
+	};
 }
 
 #endif
