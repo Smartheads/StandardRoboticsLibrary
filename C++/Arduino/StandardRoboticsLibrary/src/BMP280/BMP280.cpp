@@ -53,18 +53,18 @@ bool SRL::BMP280::initialize(void)
 	Wire.begin();
 	
 	// Read calibration data
-	readUShort(BMP280_DIG_T1, &dig_t1);
-	readSShort(BMP280_DIG_T2, &dig_t2);
-	readSShort(BMP280_DIG_T3, &dig_t3);
-	readUShort(BMP280_DIG_P1, &dig_p1);
-	readSShort(BMP280_DIG_P2, &dig_p2);
-	readSShort(BMP280_DIG_P3, &dig_p3);
-	readSShort(BMP280_DIG_P4, &dig_p4);
-	readSShort(BMP280_DIG_P5, &dig_p5);
-	readSShort(BMP280_DIG_P6, &dig_p6);
-	readSShort(BMP280_DIG_P7, &dig_p7);
-	readSShort(BMP280_DIG_P8, &dig_p8);
-	readSShort(BMP280_DIG_P9, &dig_p9);
+	readUShort(BMP280_DIG_T1, &dig_T1);
+	readSShort(BMP280_DIG_T2, &dig_T2);
+	readSShort(BMP280_DIG_T3, &dig_T3);
+	readUShort(BMP280_DIG_P1, &dig_P1);
+	readSShort(BMP280_DIG_P2, &dig_P2);
+	readSShort(BMP280_DIG_P3, &dig_P3);
+	readSShort(BMP280_DIG_P4, &dig_P4);
+	readSShort(BMP280_DIG_P5, &dig_P5);
+	readSShort(BMP280_DIG_P6, &dig_P6);
+	readSShort(BMP280_DIG_P7, &dig_P7);
+	readSShort(BMP280_DIG_P8, &dig_P8);
+	readSShort(BMP280_DIG_P9, &dig_P9);
 	
 	return setMode(NORMAL_MODE) && setOversampling(STANDARD_RES);
 }
@@ -93,7 +93,7 @@ bool SRL::BMP280::setOversampling(unsigned int value)
 	
 	bool ret = writeBytes(BMP280_CTRL_MEAS, 2, buff);
 	
-	delete buff;
+	delete[] buff;
 	return ret;
 }
 
@@ -114,7 +114,7 @@ bool SRL::BMP280::setMode(byte value)
 	
 	bool ret = writeBytes(BMP280_CTRL_MEAS, 2, buff);
 	
-	delete buff;
+	delete[] buff;
 	return ret;
 }
 
@@ -128,8 +128,8 @@ void SRL::BMP280::readUShort(uint8_t reg, unsigned short* ushort)
 {
 	byte* buff = new byte(2);
 	readBytes(reg, buff, 2);
-	*ushort = unsigned short (buff[0] << 8 | buff[1]);
-	delete buff;
+	*ushort = (unsigned short) (buff[0] << 8 | buff[1]);
+	delete[] buff;
 }
 
 /**
@@ -142,6 +142,60 @@ void SRL::BMP280::readSShort(uint8_t reg, signed short* sshort)
 {
 	byte* buff = new byte(2);
 	readBytes(reg, buff, 2);
-	*sshort = signed short (buff[0] << 8 | buff[1]);
-	delete buff;
+	*sshort = (signed short) (buff[0] << 8 | buff[1]);
+	delete[] buff;
+}
+
+/**
+*	Returns the latest pressure reading.
+*
+*	@return The latest pressure reading in pa.
+*/
+double SRL::BMP280::getPressure(void)
+{
+	// Get uncalculated pressure measurements
+	byte* pbuffer = new byte[3];
+	readBytes(BMP280_PRESS, pbuffer, 3);
+
+	double press = (double)(pbuffer[0] * 4096 + pbuffer[1] * 16 + pbuffer[2] / 16);
+	double temp = getTemperature() * 5120.0;
+	
+	delete[] pbuffer;
+	
+	double var1 = (temp / 2.0) - 64000.0;
+	double var2 = var1 * var1 * dig_P6 / 32768.0;
+	var2 = var2 + var1 * dig_P5 * 2.0;
+	var1 = (dig_P3 * var1 * var1 / 524288.0 + dig_P2 * var1) / 524288.0;
+	var1 = (1.0 + var1 / 32768.0) * dig_P1;
+	
+	if (var1 == 0.0)
+	{
+		return 0;
+	}
+	
+	double p = 1048576.0 - press;
+	p = (p - (var2 / 4096.0)) * 6250.0 / var1;
+	var1 = dig_P9 * p * p / 2147483648.0;
+	var2 = p * dig_P8 / 32768.0;
+	p = p + (var1 + var2 + dig_P7) / 16.0;
+	
+	return p;
+}
+
+/**
+*	Returns the latest temperature reading.
+*
+*	@return The latest temperature reading in Celcius.
+*/
+double SRL::BMP280::getTemperature(void)
+{
+	byte* tbuffer = new byte[3];
+	readBytes(BMP280_TEMP, tbuffer, 3);
+	
+	double temp = (double)(tbuffer[0] * 4096 + tbuffer[1] * 16 + tbuffer[2] / 16);
+	
+	double var1 = (temp / 16384.0 - dig_T1 / 1024.0) * dig_T2;
+	double var2 = ((temp / 131072.0 - dig_T1 / 8192.0) * (temp / 131072.0 - dig_T1 / 8192.0)) * dig_T3;
+	
+	return (var1 + var2) / 5120.0;
 }

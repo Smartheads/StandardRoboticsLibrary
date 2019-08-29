@@ -31,6 +31,8 @@
 #define BMP280_COMPONENT_NAME "BMP280"
 #define BMP280_DEFAULT_ADDRESS 0x78
 #define BMP280_CTRL_MEAS 0xF4
+#define BMP280_PRESS 0xF7
+#define BMP280_TEMP	0xFA
 
 #define BMP280_DIG_T1 0x88
 #define BMP280_DIG_T2 0x8A
@@ -57,6 +59,13 @@ namespace SRL
 			bool setOversampling(unsigned int value);
 			bool setMode(byte value);
 			
+			double getTemperature(void);
+			double getPressure(void);
+			double getAltitude(void);
+			
+			double getMedianTemperature(unsigned int samples = 5);
+			double getMedianPressure(unsigned int samples = 5);
+			double getMedianAltitude(unsigned int samples = 5);
 			
 			
 			typedef enum
@@ -78,6 +87,7 @@ namespace SRL
 		private:
 			void readUShort(uint8_t reg, unsigned short* ushort);
 			void readSShort(uint8_t reg, signed short* sshort);
+			
 			// Calibration data
 			unsigned short dig_T1, dig_P1;
 			signed short dig_T2, dig_T3, dig_P2, dig_P3, dig_P4, dig_P5, dig_P6, dig_P7, dig_P8, dig_P9;
