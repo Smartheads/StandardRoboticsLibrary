@@ -46,11 +46,14 @@ SRL::BMP280::~BMP280(void)
 /**
 *	Initializer method for class BMP280.
 *
+*	@param basePressure Pressure reading at ground level in Pa. Used in calculating altitude.
 *	@return bool True if successfull.
 */
-bool SRL::BMP280::initialize(void)
+bool SRL::BMP280::initialize(double basePressure)
 {
 	Wire.begin();
+	
+	this->basePressure = basePressure;
 	
 	// Read calibration data
 	readUShort(BMP280_DIG_T1, &dig_T1);
@@ -198,4 +201,78 @@ double SRL::BMP280::getTemperature(void)
 	double var2 = ((temp / 131072.0 - dig_T1 / 8192.0) * (temp / 131072.0 - dig_T1 / 8192.0)) * dig_T3;
 	
 	return (var1 + var2) / 5120.0;
+}
+
+/**
+*	Returns the latest altitude reading.
+*
+*	@return The latest altitude reading in meters.
+*/
+double SRL::BMP280::getAltitude(void)
+{
+	return (44330.0 * (1 - pow(getPressure() / basePressure, 1 / 5.255)));
+}
+
+/**
+*	Returns the median of a few pressure measurements.
+*
+*	@param samples The amount of measurements to take.
+*	@return Median of pressure measurements.
+*/
+double SRL::BMP280::getMedianPressure(unsigned int samples)
+{
+	double readings[samples];
+	for (unsigned int i = 0; i < samples; i++)
+	{
+		readings[i] = getPressure();
+	}
+	
+	return getMedian<double>(samples, readings);
+}
+
+/**
+*	Returns the median of a few temperature measurements.
+*
+*	@param samples The amount of measurements to take.
+*	@return Median of temperature measurements.
+*/
+double SRL::BMP280::getMedianTemperature(unsigned int samples)
+{
+	double readings[samples];
+	for (unsigned int i = 0; i < samples; i++)
+	{
+		readings[i] = getTemperature();
+	}
+	
+	return getMedian<double>(samples, readings);
+}
+
+/**
+*	Sets the base pressure setting.
+*
+*	@param basePressure Pressure reading at the ground level in Pa.
+*/
+void SRL::BMP280::setBasePressure(double basePressure)
+{
+	this->basePressure = basePressure;
+}
+
+/**
+*	Returns the base pressure setting.
+*
+*	@return Base pressure settin in Pa.
+*/
+double SRL::BMP280::getBasePressure(void)
+{
+	return basePressure;
+}
+
+/**
+*	Sets the base pressure setting to the median of pressure readings.
+*
+*	@param samples The number of measurements to take.
+*/
+void SRL::BMP280::calibrateBasePressure(unsigned int samples)
+{
+	basePressure = getMedianPressure(samples) / 10;
 }

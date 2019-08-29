@@ -27,6 +27,7 @@
 #include <SRL.h>
 #include <Component.h>
 #include <I2C.h>
+#include <Statistics.h>
 
 #define BMP280_COMPONENT_NAME "BMP280"
 #define BMP280_DEFAULT_ADDRESS 0x78
@@ -55,9 +56,13 @@ namespace SRL
 			BMP280(uint8_t addr = BMP280_DEFAULT_ADDRESS);
 			~BMP280(void);
 			
-			bool initialize(void);
+			bool initialize(double basePressure = 101325);
 			bool setOversampling(unsigned int value);
 			bool setMode(byte value);
+			
+			void setBasePressure(double basePressure);
+			double getBasePressure(void);
+			void calibrateBasePressure(unsigned int samples = 5);
 			
 			double getTemperature(void);
 			double getPressure(void);
@@ -87,6 +92,8 @@ namespace SRL
 		private:
 			void readUShort(uint8_t reg, unsigned short* ushort);
 			void readSShort(uint8_t reg, signed short* sshort);
+			
+			double basePressure;
 			
 			// Calibration data
 			unsigned short dig_T1, dig_P1;
