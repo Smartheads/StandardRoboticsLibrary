@@ -155,7 +155,7 @@ void SRL::BMP280::readSShort(uint8_t reg, signed short* sshort)
 /**
 *	Returns the latest pressure reading.
 *
-*	@return The latest pressure reading in pa.
+*	@return The latest pressure reading in Pa.
 */
 double SRL::BMP280::getPressure(void)
 {
