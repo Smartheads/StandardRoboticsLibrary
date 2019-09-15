@@ -21,57 +21,30 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _STATISTICS_H
-#define _STATISTICS_H
+#ifndef SRL_ALTIMETER
+#define SRL_ALTIMETER
 
 #include <SRL.h>
-#include <math.h>
+#include <Component.h>
 
 namespace SRL
 {
-  template <typename number>
-  double getMedian(unsigned int argc, number* argv)
-  {
-    unsigned int j;
-
-    for (unsigned int i = 1; i < argc; i++)
-    {
-      for (j = i; j > 0 && argv[j - 1] > argv[j]; j--)
-      {
-        number t = argv[j];
-        argv[j] = argv[j - 1];
-        argv[j - 1] = t;
-      }
-    }
-
-	if (argc % 2 == 1)
+	class Altimeter : virtual public SRL::Component
 	{
-		return argv[(unsigned int) floor(argc / 2)];
-	}
-	else
-	{
-		unsigned int m = (unsigned int) floor(argc / 2);
-		return (argv[m] + argv[m+1]) / 2;
-	}
-  }
-
-  template <typename number>
-  number getAverage(unsigned int argc, number* argv)
-  {
-    number sum = 0;
-    for (unsigned int i = 0; i < argc; i++)
-    {
-      sum += argv[i];
-    }
-
-    return sum / argc;
-  }
-
-  template <typename number>
-  bool equals(number a, number b, number v = ((number) 0))
-  {
-    return a <= (b + v) && a >= (b - v);
-  }
+		public:
+			virtual double getPressure() = 0;
+			
+			double getAltitude();
+			
+			double getMedianPressure(unsigned int samples = 5);
+			double getMedianAltitude(unsigned int samples = 5);
+			
+			void setBasePressure(double basePressure);
+			double getBasePressure(void);
+			void calibrateBasePressure(unsigned int samples = 5);
+		protected:
+			double basePressure;
+	};
 }
 
 #endif
