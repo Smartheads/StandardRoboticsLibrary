@@ -19,6 +19,7 @@ package communication.scom;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import exceptions.IncompatibleProtocolVersionException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -87,8 +88,10 @@ public final class Master implements SerialPortDataListener
     /**
      *  Opens serial communication.
      * 
+     * @see SCOM Protocol
+     * @throws exceptions.IncompatibleProtocolVersionException
      */
-    public void open()
+    public void open() throws IncompatibleProtocolVersionException
     {
         port.openPort();
         port.addDataListener(this);
@@ -100,6 +103,19 @@ public final class Master implements SerialPortDataListener
         while(status != OK_CONTINUE) {}
         
         status = WAITING_FOR_SLAVE_SIGNAL;
+        while(status != OK_CONTINUE) {}
+        
+        if (lastSlaveSignal != VERSION)
+        {
+            sendSignal(EOT);
+            while(status != OK_CONTINUE) {}
+            throw new exceptions.IncompatibleProtocolVersionException();
+        }
+        else
+        {
+            sendSignal(ETB);
+            while(status != OK_CONTINUE) {}
+        }
     }
     
     /**
@@ -166,37 +182,56 @@ public final class Master implements SerialPortDataListener
     public void serialEvent(SerialPortEvent event) {
         System.out.println("Received: "+Arrays.toString(event.getReceivedData()));
         
-        if (status == WAITING_FOR_SLAVE_RESPONCE)
+        if (event.getReceivedData().length >= 2)
         {
-            if (event.getReceivedData().length >= 2)
+            if (status == WAITING_FOR_SLAVE_RESPONCE)
+            {    
+                ByteBuffer bb = ByteBuffer.allocate(2);
+                bb.put(event.getReceivedData()[0]);
+                bb.put(event.getReceivedData()[1]);
+                short responce = bb.getShort(0);
+                
+                if (responce == ACK)
+                {
+                    status = OK_CONTINUE;
+                    System.out.println("SUCCESS");
+                    return;
+                }
+
+                if (responce == awaitedSum)
+                {
+                    // Send ACK signal
+                    writeInt16(ACK);
+                    status = OK_CONTINUE;
+                    failedAttempts = 0;
+                    System.out.println("SUCCESS");
+                }
+                else
+                {
+                    if (failedAttempts < MAX_ATTEMPTS)
+                    {
+                         writeInt16(lastSignal);
+                         failedAttempts++;
+                    }
+                    else
+                    {
+                        close();
+                    }
+                }
+            }
+            else if (status == WAITING_FOR_SLAVE_SIGNAL)
             {
-               ByteBuffer bb = ByteBuffer.allocate(2);
-               bb.put(event.getReceivedData()[0]);
-               bb.put(event.getReceivedData()[1]);
-               short responce = bb.getShort(0);
-               System.out.println("Awaited: "+awaitedSum);
-               System.out.println("Recived: "+responce);
-               
-               if (responce == awaitedSum)
-               {
-                   // Send ACK signal
-                   writeInt16(ACK);
-                   status = OK_CONTINUE;
-                   failedAttempts = 0;
-                   System.out.println("SUCCESS");
-               }
-               else
-               {
-                   if (failedAttempts < MAX_ATTEMPTS)
-                   {
-                        writeInt16(lastSignal);
-                        failedAttempts++;
-                   }
-                   else
-                   {
-                       close();
-                   }
-               }
+                // Parse recived bytes
+                ByteBuffer bb = ByteBuffer.allocate(2);
+                bb.put(event.getReceivedData()[0]);
+                bb.put(event.getReceivedData()[1]);
+                short signal = bb.getShort(0);
+                
+                lastSlaveSignal = signal;
+                
+                // Send responce
+                writeInt16(calculateSum(Short.toString(signal)));
+                status = WAITING_FOR_SLAVE_RESPONCE;
             }
         }
     }
