@@ -80,6 +80,7 @@ bool SRL::BMP280::initialize(double basePressure)
 *
 *	XXX: osrs_p, Pressure oversampling
 *	YYY: osrs_t, Temperature oversampling
+*	@see BMP280 Product specification from Bosch.
 *
 *	@param value Oversampling value
 *	@return Returns true if successfull.
@@ -104,6 +105,8 @@ bool SRL::BMP280::setOversampling(unsigned int value)
 *	Sets the BMP280's operation mode.
 *
 *	@param value Mode value
+*	@see BMP280 Product specification from Bosch.
+
 *	@return Returns true if successfull.
 */
 bool SRL::BMP280::setMode(byte value)
@@ -152,7 +155,7 @@ void SRL::BMP280::readSShort(uint8_t reg, signed short* sshort)
 /**
 *	Returns the latest pressure reading.
 *
-*	@return The latest pressure reading in pa.
+*	@return The latest pressure reading in Pa.
 */
 double SRL::BMP280::getPressure(void)
 {
@@ -244,6 +247,22 @@ double SRL::BMP280::getMedianTemperature(unsigned int samples)
 		readings[i] = getTemperature();
 	}
 	
+	return getMedian<double>(samples, readings);
+}
+
+/**
+*	Returns the median of a few altitude measurements.
+*
+*	@param samples The amount of measurements to take.
+*	@return Median of temperature measurements
+*/
+double SRL::BMP280::getMedianAltitude(unsigned int samples)
+{
+	double readings[samples];
+	for (unsigned int i = 0; i < samples; i++)
+	{
+		readings[samples] = getAltitude();
+	}
 	return getMedian<double>(samples, readings);
 }
 
