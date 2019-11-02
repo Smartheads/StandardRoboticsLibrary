@@ -49,6 +49,7 @@ SRL::Slave::~Slave()
 uint8_t SRL::Slave::openSCOM(unsigned int baudRate)
 {
 	Serial.begin(baudRate);
+	mode = SIGNAL_MODE;
 	status = WAITING_FOR_MASTER_SIGNAL;
 	
 	// Wait for SOH signal
@@ -69,6 +70,8 @@ uint8_t SRL::Slave::openSCOM(unsigned int baudRate)
 	// Get version compatibility information
 	status = WAITING_FOR_MASTER_SIGNAL;
 	waitForUpdate();
+	
+	status = WAITING_FOR_MASTER_SIGNAL;
 	
 	return lastMasterSignal == ETB;
 }
@@ -93,7 +96,7 @@ void SRL::Slave::waitForUpdate(void)
 void SRL::Slave::updateSCOM(void)
 {
 	// Wait for a complete message to arrive
-	if (Serial.available() > 1)
+	if (Serial.available() > 1 || (status == WAITING_FOR_MASTER_COMMAND && Serial.available() > 0))
 	{
 		if (status == WAITING_FOR_MASTER_SIGNAL)
 		{
@@ -111,6 +114,19 @@ void SRL::Slave::updateSCOM(void)
 			if (masterResponce == ACK)
 			{
 				status = OK_CONTINUE;
+				
+				// Prepair for infomessage
+				if (lastMasterSignal == STX)
+				{
+					status = WAITING_FOR_MASTER_COMMAND;					
+				}
+				
+				if (mode == COMMAND_MODE)
+				{
+					status = WAITING_FOR_MASTER_SIGNAL;
+					mode = SIGNAL_MODE;
+				}
+
 				return;
 			}
 			
@@ -124,6 +140,15 @@ void SRL::Slave::updateSCOM(void)
 			{
 				// TODO: Implement
 			}
+		}
+		else if (status == WAITING_FOR_MASTER_COMMAND)
+		{
+			String command = Serial.readString();
+			
+			status = WAITING_FOR_MASTER_RESPONCE;
+			mode = COMMAND_MODE;
+			
+			sendInt16(calculateSum(command));
 		}
 	}
 }

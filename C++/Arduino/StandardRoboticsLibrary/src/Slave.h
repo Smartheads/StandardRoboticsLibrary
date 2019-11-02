@@ -42,6 +42,7 @@ namespace SRL
 			int16_t lastSlaveSignal;
 			int16_t awaitedSum;
 			unsigned int status;
+			unsigned int mode;
 			
 			void waitForUpdate(void);
 	};

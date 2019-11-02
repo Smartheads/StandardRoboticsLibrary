@@ -29,6 +29,8 @@
 #define VERSION 1204
 
 #define SOH 1
+#define STX 2
+#define ETX	3
 #define EOT 4
 #define ACK 5
 #define ETB 23
@@ -37,6 +39,9 @@
 #define WAITING_FOR_MASTER_SIGNAL 1
 #define WAITING_FOR_MASTER_RESPONCE 2
 #define END_COMMUNICATION 3
+#define WAITING_FOR_MASTER_COMMAND 4
+#define SIGNAL_MODE 5
+#define COMMAND_MODE 6
 
 namespace SRL
 {
