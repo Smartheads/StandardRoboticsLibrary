@@ -17,6 +17,9 @@
 package communication;
 
 import communication.scom.Master;
+import exceptions.IncompatibleProtocolVersionException;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -29,12 +32,11 @@ public class SerialComTest {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        Master master = new Master("ttyACM1", 115200, "ascii");
-        master.open();
-        
-        
+        Master master = new Master("ttyACM0", 115200, "ascii");
+        try {
+            master.open();
+        } catch (IncompatibleProtocolVersionException ex) {
+            Logger.getLogger(SerialComTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
-    
-    
-    
 }
