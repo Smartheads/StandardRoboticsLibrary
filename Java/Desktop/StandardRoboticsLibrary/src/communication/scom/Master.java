@@ -38,12 +38,14 @@ public final class Master implements SerialPortDataListener
     private volatile int status;
     private volatile int awaitedSum;
     private volatile short lastSignal;
+    private volatile Command lastCommand;
     private volatile int failedAttempts;
     
     private volatile int lastSlaveSignal;
     
     private final Charset charset;
     
+    private final static int NONE = -1;
     private final static int WAITING_FOR_SLAVE_SIGNAL = 1;
     private final static int WAITING_FOR_SLAVE_RESPONCE = 2;
     private final static int OK_CONTINUE = 0;
@@ -51,6 +53,8 @@ public final class Master implements SerialPortDataListener
     private final static int MAX_ATTEMPTS = 100;
     private final static int VERSION = 1204;
     private final static byte SOH = 1;
+    private final static byte STX = 2;
+    private final static byte ETX = 3;
     private final static byte EOT = 4;
     private final static byte ACK = 5;
     private final static byte ETB = 23;
@@ -83,6 +87,29 @@ public final class Master implements SerialPortDataListener
         this.port = port;
         this.port.setBaudRate(baudRate);
         this.charset = Charset.forName(charset);
+    }
+    
+    /**
+     *  Sends a coammnd over Serial,
+     * 
+     * @param command
+     * @see SCOM Protocol
+     */
+    public void sendCommand(Command command)
+    {
+        sendSignal(STX);
+        while(status != OK_CONTINUE) {}
+        
+        writeInfoMessage(command.toString());
+        awaitedSum = calculateSum(command.toString());
+        
+        // Wait for responce
+        status = WAITING_FOR_SLAVE_RESPONCE;
+        lastSignal = NONE;
+        while(status != OK_CONTINUE) {}
+        
+        sendSignal(ETX);
+        while(status != OK_CONTINUE) {}
     }
     
     /**
@@ -160,6 +187,17 @@ public final class Master implements SerialPortDataListener
     }
     
     /**
+     * Sends a string over serial.
+     * 
+     * @param str 
+     */
+    private void writeInfoMessage(String str)
+    {
+        byte[] buff = str.getBytes(charset);
+        this.port.writeBytes(buff, buff.length);
+    }
+    
+    /**
      * Sends a signal to the Slave.
      * 
      * @see SCOM1204
@@ -210,7 +248,14 @@ public final class Master implements SerialPortDataListener
                 {
                     if (failedAttempts < MAX_ATTEMPTS)
                     {
-                         writeInt16(lastSignal);
+                        if (lastSignal != NONE) // NONE if last message was an info message.
+                        {
+                            writeInt16(lastSignal);
+                        }
+                        else
+                        {
+                            writeInfoMessage(lastCommand.toString());
+                        }
                          failedAttempts++;
                     }
                     else

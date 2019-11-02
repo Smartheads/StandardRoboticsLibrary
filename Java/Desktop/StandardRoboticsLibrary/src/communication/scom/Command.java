@@ -81,12 +81,15 @@ public final class Command {
     {
         StringBuilder sb = new StringBuilder(body);
         sb.append("(");
-        for (int i = 0; i < args.length; i++)
+        if (args != null)
         {
-            sb.append(args[i]);
-            if (i != args.length - 1)
+            for (int i = 0; i < args.length; i++)
             {
-                sb.append(",");
+                sb.append(args[i]);
+                if (i != args.length - 1)
+                {
+                    sb.append(",");
+                }
             }
         }
         sb.append(");");

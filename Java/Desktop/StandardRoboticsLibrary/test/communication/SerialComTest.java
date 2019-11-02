@@ -16,6 +16,7 @@
  */
 package communication;
 
+import communication.scom.Command;
 import communication.scom.Master;
 import exceptions.IncompatibleProtocolVersionException;
 import java.util.logging.Level;
@@ -35,6 +36,7 @@ public class SerialComTest {
         Master master = new Master("ttyACM0", 115200, "ascii");
         try {
             master.open();
+            master.sendCommand(new Command("helloWorld"));
         } catch (IncompatibleProtocolVersionException ex) {
             Logger.getLogger(SerialComTest.class.getName()).log(Level.SEVERE, null, ex);
         }
