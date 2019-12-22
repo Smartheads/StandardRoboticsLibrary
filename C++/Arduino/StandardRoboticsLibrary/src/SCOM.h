@@ -42,6 +42,7 @@
 #define WAITING_FOR_MASTER_COMMAND 4
 #define SIGNAL_MODE 5
 #define COMMAND_MODE 6
+#define IN_TIMEOUT_BUFFER 7
 
 namespace SRL
 {

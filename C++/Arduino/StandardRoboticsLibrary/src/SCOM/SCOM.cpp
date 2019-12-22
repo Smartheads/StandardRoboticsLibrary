@@ -45,9 +45,10 @@ void SRL::sendInt16(int16_t num)
 */
 int16_t SRL::readInt16(void)
 {
-	byte* k = new byte[2];
-    Serial.readBytes(k, 2);
-    int16_t out = k[0] << 8 | k[1];
+	int len = Serial.available();
+	byte* k = new byte[len];
+    Serial.readBytes(k, len);
+    int16_t out = k[len-2] << 8 | k[len-1];
     delete[] k;
     
     return out;

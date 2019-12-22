@@ -49,6 +49,7 @@ SRL::Slave::~Slave()
 uint8_t SRL::Slave::openSCOM(unsigned int baudRate)
 {
 	Serial.begin(baudRate);
+	Serial.setTimeout(2000);
 	mode = SIGNAL_MODE;
 	status = WAITING_FOR_MASTER_SIGNAL;
 	
@@ -82,10 +83,25 @@ uint8_t SRL::Slave::openSCOM(unsigned int baudRate)
 */
 void SRL::Slave::waitForUpdate(void)
 {
-	while(status != OK_CONTINUE)
+	while(status != IN_TIMEOUT_BUFFER)
 	{
 		updateSCOM();
+		
+		if (status == OK_CONTINUE)
+			return;
 	}
+	
+	for (int i = 0; i<10; i++)
+	{
+		delay(200);
+		updateSCOM();
+		
+		if (status == OK_CONTINUE)
+			return;
+	}
+
+	// Timeout error!
+	exit(1);
 }
 
 /**
@@ -95,6 +111,8 @@ void SRL::Slave::waitForUpdate(void)
 */
 void SRL::Slave::updateSCOM(void)
 {
+	//watchTimeout();	
+	
 	// Wait for a complete message to arrive
 	if (Serial.available() > 1 || (status == WAITING_FOR_MASTER_COMMAND && Serial.available() > 0))
 	{
@@ -133,12 +151,13 @@ void SRL::Slave::updateSCOM(void)
 			if (masterResponce == awaitedSum)
 			{
 				sendInt16(ACK);
-				status = OK_CONTINUE;
+				status = IN_TIMEOUT_BUFFER;
 				return;
 			}
 			else
 			{
 				// TODO: Implement
+				sendInt16(VERSION);
 			}
 		}
 		else if (status == WAITING_FOR_MASTER_COMMAND)
@@ -150,5 +169,31 @@ void SRL::Slave::updateSCOM(void)
 			
 			sendInt16(calculateSum(command));
 		}
+		else if (status == IN_TIMEOUT_BUFFER)
+		{
+			int16_t masterResponce = readInt16();
+			
+			if (masterResponce == awaitedSum)
+			{
+				sendInt16(ACK);
+				status = IN_TIMEOUT_BUFFER;
+				return;
+			}
+		}
 	}
+	else if (status == IN_TIMEOUT_BUFFER)
+	{
+		status = OK_CONTINUE;
+	}
+	
 }
+
+/**
+*	Watches communication timeouts.
+*
+*
+*
+void SRL::Slave::watchTimeout(void)
+{
+
+}*/

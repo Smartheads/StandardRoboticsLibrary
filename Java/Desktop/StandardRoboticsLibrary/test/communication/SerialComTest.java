@@ -18,6 +18,7 @@ package communication;
 
 import communication.scom.Command;
 import communication.scom.Master;
+import exceptions.ConnectionTimeoutException;
 import exceptions.IncompatibleProtocolVersionException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
@@ -37,8 +38,9 @@ public class SerialComTest {
         try {
             master.open();
             master.sendCommand(new Command("helloWorld"));
-        } catch (IncompatibleProtocolVersionException ex) {
+        } catch (IncompatibleProtocolVersionException | ConnectionTimeoutException ex) {
             Logger.getLogger(SerialComTest.class.getName()).log(Level.SEVERE, null, ex);
+            System.exit(1);
         }
     }
 }

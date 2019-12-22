@@ -19,10 +19,13 @@ package communication.scom;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import exceptions.ConnectionTimeoutException;
 import exceptions.IncompatibleProtocolVersionException;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.Arrays;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *  Master.java - SCOM Communication master.
@@ -42,6 +45,7 @@ public final class Master implements SerialPortDataListener
     private volatile int failedAttempts;
     
     private volatile int lastSlaveSignal;
+    private volatile long messageId;
     
     private final Charset charset;
     
@@ -50,7 +54,7 @@ public final class Master implements SerialPortDataListener
     private final static int WAITING_FOR_SLAVE_RESPONCE = 2;
     private final static int OK_CONTINUE = 0;
     
-    private final static int MAX_ATTEMPTS = 100;
+    private final static int MAX_ATTEMPTS = 10;
     private final static int VERSION = 1204;
     private final static byte SOH = 1;
     private final static byte STX = 2;
@@ -93,12 +97,13 @@ public final class Master implements SerialPortDataListener
      *  Sends a coammnd over Serial,
      * 
      * @param command
+     * @throws exceptions.ConnectionTimeoutException
      * @see SCOM Protocol
      */
-    public void sendCommand(Command command)
+    public void sendCommand(Command command) throws ConnectionTimeoutException
     {
         sendSignal(STX);
-        while(status != OK_CONTINUE) {}
+        while(status != OK_CONTINUE) {watchTimeout();}
         
         writeInfoMessage(command.toString());
         awaitedSum = calculateSum(command.toString());
@@ -106,42 +111,43 @@ public final class Master implements SerialPortDataListener
         // Wait for responce
         status = WAITING_FOR_SLAVE_RESPONCE;
         lastSignal = NONE;
-        while(status != OK_CONTINUE) {}
+        while(status != OK_CONTINUE) {watchTimeout();}
         
         sendSignal(ETX);
-        while(status != OK_CONTINUE) {}
+        while(status != OK_CONTINUE) {watchTimeout();}
     }
     
     /**
      *  Opens serial communication.
      * 
+     * @throws exceptions.ConnectionTimeoutException
      * @see SCOM Protocol
      * @throws exceptions.IncompatibleProtocolVersionException
      */
-    public void open() throws IncompatibleProtocolVersionException
+    public void open() throws IncompatibleProtocolVersionException, ConnectionTimeoutException
     {
         port.openPort();
         port.addDataListener(this);
         
         sendSignal(SOH);
-        while(status != OK_CONTINUE) {}
+        while(status != OK_CONTINUE) {watchTimeout();}
         
         sendSignal(VERSION);
-        while(status != OK_CONTINUE) {}
+        while(status != OK_CONTINUE) {watchTimeout();}
         
         status = WAITING_FOR_SLAVE_SIGNAL;
-        while(status != OK_CONTINUE) {}
+        while(status != OK_CONTINUE) {watchTimeout();}
         
         if (lastSlaveSignal != VERSION)
         {
             sendSignal(EOT);
-            while(status != OK_CONTINUE) {}
+            while(status != OK_CONTINUE) {watchTimeout();}
             throw new exceptions.IncompatibleProtocolVersionException();
         }
         else
         {
             sendSignal(ETB);
-            while(status != OK_CONTINUE) {}
+            while(status != OK_CONTINUE) {watchTimeout();}
         }
     }
     
@@ -193,6 +199,7 @@ public final class Master implements SerialPortDataListener
      */
     private void writeInfoMessage(String str)
     {
+        messageId = System.nanoTime();
         byte[] buff = str.getBytes(charset);
         this.port.writeBytes(buff, buff.length);
     }
@@ -206,6 +213,7 @@ public final class Master implements SerialPortDataListener
     private void sendSignal(int i)
     {
        lastSignal = (short)i;
+       messageId =  System.nanoTime();
        status = WAITING_FOR_SLAVE_RESPONCE;
        awaitedSum = calculateSum(Integer.toString(i));
        writeInt16(i);
@@ -240,6 +248,7 @@ public final class Master implements SerialPortDataListener
                 {
                     // Send ACK signal
                     writeInt16(ACK);
+                    messageId = System.nanoTime();
                     status = OK_CONTINUE;
                     failedAttempts = 0;
                     System.out.println("SUCCESS");
@@ -275,9 +284,75 @@ public final class Master implements SerialPortDataListener
                 lastSlaveSignal = signal;
                 
                 // Send responce
-                writeInt16(calculateSum(Short.toString(signal)));
+                lastSignal = (short) calculateSum(Short.toString(signal));
+                messageId =  System.nanoTime();
+                writeInt16(lastSignal);
+                System.out.println(lastSignal);
                 status = WAITING_FOR_SLAVE_RESPONCE;
             }
+            else
+            {
+                // Read signal
+                ByteBuffer bb = ByteBuffer.allocate(2);
+                bb.put(event.getReceivedData()[0]);
+                bb.put(event.getReceivedData()[1]);
+                short signal = bb.getShort(0);
+                
+                // If sent within timeout buffer
+                if (System.nanoTime() <= messageId + 250)
+                {
+                    if (signal == awaitedSum)
+                    {
+                        // Send ACK signal
+                        writeInt16(ACK);
+                        messageId = System.nanoTime();
+                        status = OK_CONTINUE;
+                        failedAttempts = 0;
+                        System.out.println("SUCCESS");
+                    }
+                }
+            }
         }
+    }
+
+    /**
+     *  Handels timeouts and other time based operations
+     * 
+     * @throws exceptions.ConnectionTimeoutException
+     */
+    public void watchTimeout() throws ConnectionTimeoutException
+    {
+        long tracedMessage = messageId;
+        for (int i = 0; i < MAX_ATTEMPTS; i++)
+        {
+            for (int x = 0; x < 20; x++)
+            {
+                try
+                {
+                    Thread.sleep(10);
+                }
+                catch (InterruptedException e)
+                {
+                    Logger.getLogger(Master.class.getName()).log(Level.SEVERE, "Error sleeping thread.");
+                }
+
+                if (status != WAITING_FOR_SLAVE_RESPONCE)
+                    return;
+            }
+
+            if (tracedMessage == messageId)
+            {
+                if (lastSignal == NONE)
+                    writeInfoMessage(lastCommand.toString());
+                else
+                    sendSignal(lastSignal);
+                tracedMessage = messageId;
+            }
+            else
+            {
+                return;
+            }
+        }
+        throw new ConnectionTimeoutException();
     }
 }
