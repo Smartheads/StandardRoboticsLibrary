@@ -16,31 +16,22 @@
  */
 package communication;
 
-import communication.scom.Command;
 import communication.scom.Master;
-import exceptions.ConnectionTimeoutException;
-import exceptions.IncompatibleProtocolVersionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 
 /**
  *
  * @author deaxuser
  */
-public class SerialComTest {
+public class SerialComDebug {
 
     /**
      * @param args the command line arguments
      */
-    public static void main(String[] args) {
+    public static void main(String[] args)
+    {
         // TODO code application logic here
         Master master = new Master("ttyUSB0", 115200, "ascii");
-        try {
-            master.open();
-            master.sendCommand(new Command("helloWorld"));
-        } catch (IncompatibleProtocolVersionException | ConnectionTimeoutException ex) {
-            Logger.getLogger(SerialComTest.class.getName()).log(Level.SEVERE, null, ex);
-            System.exit(1);
-        }
+        master.sendSignal((short)1);
     }
+    
 }

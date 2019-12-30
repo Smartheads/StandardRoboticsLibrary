@@ -34,7 +34,7 @@ import java.util.logging.Logger;
  * @since 2019.10.26
  * @author deaxuser - Robert Hutter
  */
-public final class Master implements SerialPortDataListener
+public /*final*/ class Master implements SerialPortDataListener
 {
     SerialPort port;
     
@@ -44,24 +44,26 @@ public final class Master implements SerialPortDataListener
     private volatile Command lastCommand;
     private volatile int failedAttempts;
     
-    private volatile int lastSlaveSignal;
+    private volatile short lastSlaveSignal;
     private volatile long messageId;
     
     private final Charset charset;
     
+    private final static int COMMUNICATION_ENDED = -2;
     private final static int NONE = -1;
     private final static int WAITING_FOR_SLAVE_SIGNAL = 1;
     private final static int WAITING_FOR_SLAVE_RESPONCE = 2;
+    private final static int RECOVERING_WRONG_SLAVE_RESPONCE = 3;
     private final static int OK_CONTINUE = 0;
     
     private final static int MAX_ATTEMPTS = 10;
-    private final static int VERSION = 1204;
-    private final static byte SOH = 1;
-    private final static byte STX = 2;
-    private final static byte ETX = 3;
-    private final static byte EOT = 4;
-    private final static byte ACK = 5;
-    private final static byte ETB = 23;
+    private final static short VERSION = 1204;
+    private final static short SOH = 1;
+    private final static short STX = 2;
+    private final static short ETX = 3;
+    private final static short EOT = 4;
+    private final static short ACK = 5;
+    private final static short ETB = 23;
     
     /**
      *  Constructor for SCOM Master
@@ -76,6 +78,8 @@ public final class Master implements SerialPortDataListener
         port = SerialPort.getCommPort(portDesc);
         port.setBaudRate(baudRate);
         this.charset = Charset.forName(charset);
+        port.openPort();
+        port.addDataListener(this);
     }
     
     /**
@@ -130,13 +134,13 @@ public final class Master implements SerialPortDataListener
         port.addDataListener(this);
         
         sendSignal(SOH);
-        while(status != OK_CONTINUE) {watchTimeout();}
+        do {watchTimeout();} while(status != OK_CONTINUE);
         
         sendSignal(VERSION);
-        while(status != OK_CONTINUE) {watchTimeout();}
+        do {watchTimeout();} while(status != OK_CONTINUE);
         
         status = WAITING_FOR_SLAVE_SIGNAL;
-        while(status != OK_CONTINUE) {watchTimeout();}
+        do {watchTimeout();} while(status != OK_CONTINUE);
         
         if (lastSlaveSignal != VERSION)
         {
@@ -156,6 +160,7 @@ public final class Master implements SerialPortDataListener
      */
     public void close()
     {
+        status = COMMUNICATION_ENDED;
         writeInt16(EOT);
         port.closePort();
     }
@@ -188,7 +193,7 @@ public final class Master implements SerialPortDataListener
     private void writeInt16(int i)
     {
         byte[] b = ByteBuffer.allocate(2).putShort((short)i).array();
-        System.out.println("Sent: "+Arrays.toString(b));
+        //System.out.println("Sent: "+Arrays.toString(b));
         port.writeBytes(b, 2);
     }
     
@@ -210,13 +215,14 @@ public final class Master implements SerialPortDataListener
      * @see SCOM1204
      * @param i The signal identifier.
      */
-    private void sendSignal(int i)
+    private void sendSignal(short i)
     {
-       lastSignal = (short)i;
+       lastSignal = i;
        messageId =  System.nanoTime();
        status = WAITING_FOR_SLAVE_RESPONCE;
        awaitedSum = calculateSum(Integer.toString(i));
        writeInt16(i);
+       System.out.println("Sent signal: ["+i+"]");
     }
 
     @Override
@@ -228,14 +234,21 @@ public final class Master implements SerialPortDataListener
     public void serialEvent(SerialPortEvent event) {
         System.out.println("Received: "+Arrays.toString(event.getReceivedData()));
         
-        if (event.getReceivedData().length >= 2)
+        if (event.getReceivedData().length > 1)
         {
             if (status == WAITING_FOR_SLAVE_RESPONCE)
-            {    
+            {
+                // Clear buffer by reading all bytes
+                ByteBuffer cb = ByteBuffer.allocate(event.getReceivedData().length);
+                cb.put(event.getReceivedData());
+                
+                // Take first two bytes and compile a signal
                 ByteBuffer bb = ByteBuffer.allocate(2);
-                bb.put(event.getReceivedData()[0]);
-                bb.put(event.getReceivedData()[1]);
+                bb.put(cb.get(0));
+                bb.put(cb.get(1));
+                
                 short responce = bb.getShort(0);
+                System.out.println("Recived responce: ["+responce+"]");
                 
                 if (responce == ACK)
                 {
@@ -255,6 +268,18 @@ public final class Master implements SerialPortDataListener
                 }
                 else
                 {
+                    // Kill current timeout handling function
+                    status = RECOVERING_WRONG_SLAVE_RESPONCE;
+                    try
+                    {
+                        Thread.sleep(20);
+                    }
+                    catch (InterruptedException ex)
+                    {
+                        Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+                    }
+                    status = WAITING_FOR_SLAVE_RESPONCE;
+                    
                     if (failedAttempts < MAX_ATTEMPTS)
                     {
                         if (lastSignal != NONE) // NONE if last message was an info message.
@@ -265,7 +290,18 @@ public final class Master implements SerialPortDataListener
                         {
                             writeInfoMessage(lastCommand.toString());
                         }
-                         failedAttempts++;
+                        
+                        // Run timeout handler
+                        try
+                        {
+                            watchTimeout();
+                        }
+                        catch (ConnectionTimeoutException ex)
+                        {
+                            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+                        }
+                        
+                        failedAttempts++;
                     }
                     else
                     {
@@ -320,12 +356,13 @@ public final class Master implements SerialPortDataListener
      * 
      * @throws exceptions.ConnectionTimeoutException
      */
-    public void watchTimeout() throws ConnectionTimeoutException
+    private void watchTimeout() throws ConnectionTimeoutException
     {
         long tracedMessage = messageId;
         for (int i = 0; i < MAX_ATTEMPTS; i++)
         {
-            for (int x = 0; x < 20; x++)
+            // Wait one second, but constantly check for responce meanwhile
+            for (int x = 0; x < 100; x++)
             {
                 try
                 {
@@ -336,20 +373,29 @@ public final class Master implements SerialPortDataListener
                     Logger.getLogger(Master.class.getName()).log(Level.SEVERE, "Error sleeping thread.");
                 }
 
+                // Return if no longer waiting for responce
                 if (status != WAITING_FOR_SLAVE_RESPONCE)
+                {
                     return;
+                }
             }
-
+            
+            // Resend message
             if (tracedMessage == messageId)
             {
                 if (lastSignal == NONE)
+                {
                     writeInfoMessage(lastCommand.toString());
+                }
                 else
+                {
                     sendSignal(lastSignal);
+                }
                 tracedMessage = messageId;
             }
             else
             {
+                // Return if already moved onto new message
                 return;
             }
         }
