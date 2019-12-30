@@ -27,7 +27,7 @@ import java.util.List;
  * @since 2019.10.25.
  * @author deaxuser - Robert Hutter
  */
-public class Pathfinder
+public final class Pathfinder
 {
 
     /**
