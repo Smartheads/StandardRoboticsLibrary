@@ -78,8 +78,6 @@ public /*final*/ class Master implements SerialPortDataListener
         port = SerialPort.getCommPort(portDesc);
         port.setBaudRate(baudRate);
         this.charset = Charset.forName(charset);
-        port.openPort();
-        port.addDataListener(this);
     }
     
     /**
