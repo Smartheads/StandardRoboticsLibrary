@@ -38,13 +38,15 @@ namespace SRL
 			void updateSCOM(void);
 			
 		private:
-			int16_t lastMasterSignal;
-			int16_t lastSlaveSignal;
+			Signal* lastSentSignal;
 			int16_t awaitedSum;
 			unsigned int status;
-			unsigned int mode;
+			int16_t messageId;
 			
-			void waitForUpdate(void);
+			unsigned long sumSentAt;
+			
+			void sendSignal(int16_t message);
+			void sendSum(int16_t sum);
 	};
 }
 

@@ -24,38 +24,40 @@
 #include <SCOM.h>
 
 /**
-*	Sends an int16_t over on serial.
 *
-*	@param num Int16_t to send.
+*	Writes a Signal to serial.
+*
 */
-void SRL::sendInt16(int16_t num)
+void SRL::writeSignal(Signal* sig)
 {
-	byte* o = new byte[2];
-	o[0] = num >> 8;
-	o[1] = num;
-	Serial.write(o, 2);
-	Serial.flush();
-	delete[] o;
+	Serial.write(sig->getBytes(), Signal::length);
 }
 
 /**
-*	Reads an int16_t from the serial buffer.
+*	Reads a Signal from the Serial buffer.
 *
 *
 */
-int16_t SRL::readInt16(void)
+SRL::Signal* SRL::readSignal(void)
 {
 	int len = Serial.available();
 	byte* k = new byte[len];
-    Serial.readBytes(k, len);
-    int16_t out = k[len-2] << 8 | k[len-1];
-    delete[] k;
-    
-    return out;
+	Serial.readBytes(k, len);
+	
+	byte* buffer = new byte[4];
+	buffer[0] = k[0];
+	buffer[1] = k[1];
+	buffer[2] = k[2];
+	buffer[3] = k[3];
+	
+	delete[] k;
+	
+	return new Signal(buffer);
 }
 
 /**
 *	Returns the ASCII sum of a string.
+*	Tested. Works 100%.
 *
 *	@param str
 */
@@ -67,7 +69,7 @@ int16_t SRL::calculateSum(String str)
     int16_t sum = 0;
     for (int i = 0; i < str.length()+1; i++)
     {
-      sum += (int) c[i];
+      sum += (int16_t) c[i];
     }
     delete[] c;
   
@@ -81,5 +83,121 @@ int16_t SRL::calculateSum(String str)
 */
 int16_t SRL::calculateSum(int16_t signal)
 {
-	return calculateSum(String(signal));
+	return calculateSum(String(signal, DEC));
+}
+
+/**
+*	Clears the Serial buffer by reading asnd deleting all
+*	bytes in the buffer.
+*
+*/
+void SRL::clearSerialBuffer(void)
+{
+	byte* cb = new byte[Serial.available()];
+	Serial.readBytes(cb, Serial.available());
+	delete[] cb;	
+}
+
+/**
+*
+*
+*
+*/
+SRL::Signal::Signal(int16_t messageId, int16_t message)
+{
+	sigmem = new byte[length];
+	sigmem[0] = message >> 8;
+	sigmem[1] = message;
+	sigmem[2] = messageId >> 8;
+	sigmem[3] = messageId;
+	this->createdAt = millis();
+}
+
+/**
+*
+*
+*
+*/
+SRL::Signal::Signal(byte* buffer)
+{
+	this->sigmem = buffer;
+}
+
+/**
+*
+*
+*
+*/
+SRL::Signal::~Signal(void)
+{
+	delete[] sigmem;
+}
+
+/**
+*
+*
+*
+*/
+int16_t SRL::Signal::getMessageId(void)
+{
+	int16_t ret = sigmem[2];
+	ret = ret << 8;
+	ret = ret | sigmem[3];
+	return ret;
+}
+
+/**
+*
+*
+*
+*/
+int16_t SRL::Signal::getMessage(void)
+{
+	int16_t ret = sigmem[0];
+	ret = ret << 8;
+	ret = ret | sigmem[1];
+	return ret;
+}
+
+/**
+*
+*
+*
+*/
+void SRL::Signal::setMessageId(int16_t messageId)
+{
+	sigmem[2] = messageId >> 8;
+	sigmem[3] = messageId;
+}
+
+/**
+*
+*
+*
+*/
+void SRL::Signal::setMessage(int16_t message)
+{
+	sigmem[0] = message >> 8;
+	sigmem[1] = message;
+}
+
+/**
+*
+*	Returns the sum of the Signal's message.
+*	@return
+*
+*/
+int16_t SRL::Signal::getSum(void)
+{
+	return calculateSum(this->getMessage());
+}
+
+/**
+*
+*
+*
+*/
+byte* SRL::Signal::getBytes(void)
+{
+	return sigmem;
 }

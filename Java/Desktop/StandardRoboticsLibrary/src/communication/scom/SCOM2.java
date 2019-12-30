@@ -20,6 +20,7 @@ import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortEvent;
 import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
+import java.util.Arrays;
 
 /**
  * Erstellt laut des SCOM Protokolls 1204.
@@ -57,6 +58,7 @@ public final class SCOM2
     final static byte IN_ACK_TIMEOUT_BUFFER = 0x02;
     final static byte WAITING_FOR_INFO_MESSAGE = 0x03;
     final static byte WAITING_FOR_MORE_ABF = 0x04;
+    final static byte WAITING_FOR_ACK = 0x05;
     
     /**
      *  Calculates the ASCII sum of the input String.
@@ -99,6 +101,7 @@ public final class SCOM2
     public static void writeSignal(Signal sig, SerialPort port)
     {
         port.writeBytes(sig.getBytes(), sig.length);
+        System.out.println("Sent: "+Arrays.toString(sig.getBytes()));
     }
     
     /**
@@ -121,7 +124,9 @@ public final class SCOM2
      */
     public static Signal readSignal(SerialPortEvent event)
     {
-        ByteBuffer bb = ByteBuffer.wrap(event.getReceivedData());
+        ByteBuffer bb = ByteBuffer.allocate(event.getReceivedData().length);
+        bb.put(event.getReceivedData());
+        System.out.println("Recieved: "+Arrays.toString(event.getReceivedData()));
         return new Signal(bb.getShort(2), bb.getShort(0));
     }
 }

@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2019 Robert Hutter
+* Copyright (c) 2020 Robert Hutter
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -29,7 +29,8 @@
 */
 SRL::Slave::Slave()
 {
-
+	status = OK_CONTINUE;
+	messageId = 0;
 }
 
 /**
@@ -49,59 +50,14 @@ SRL::Slave::~Slave()
 uint8_t SRL::Slave::openSCOM(unsigned int baudRate)
 {
 	Serial.begin(baudRate);
-	Serial.setTimeout(2000);
-	mode = SIGNAL_MODE;
-	status = WAITING_FOR_MASTER_SIGNAL;
+	
+	Serial.println("Hello world: " + String(Signal::length, DEC)); 
 	
 	// Wait for SOH signal
-	waitForUpdate();
+	while(Serial.available() < Signal::length) {Serial.println(Serial.available());delay(100);}
+	do {updateSCOM();} while(status != OK_CONTINUE);
 	
-	// Get version number
-	status = WAITING_FOR_MASTER_SIGNAL;
-	waitForUpdate();
-	
-	// Send version number
-	sendInt16(VERSION);
-	awaitedSum = calculateSum(VERSION);
-	
-	// Wait for responce
-	status = WAITING_FOR_MASTER_RESPONCE;
-	waitForUpdate();
-	
-	// Get version compatibility information
-	status = WAITING_FOR_MASTER_SIGNAL;
-	waitForUpdate();
-	
-	status = WAITING_FOR_MASTER_SIGNAL;
-	
-	return lastMasterSignal == ETB;
-}
-
-/**
-*	Waits for an update from the master.
-*
-*/
-void SRL::Slave::waitForUpdate(void)
-{
-	while(status != IN_TIMEOUT_BUFFER)
-	{
-		updateSCOM();
-		
-		if (status == OK_CONTINUE)
-			return;
-	}
-	
-	for (int i = 0; i<10; i++)
-	{
-		delay(200);
-		updateSCOM();
-		
-		if (status == OK_CONTINUE)
-			return;
-	}
-
-	// Timeout error!
-	exit(1);
+	return true;
 }
 
 /**
@@ -110,90 +66,88 @@ void SRL::Slave::waitForUpdate(void)
 *
 */
 void SRL::Slave::updateSCOM(void)
-{
-	//watchTimeout();	
-	
+{	
 	// Wait for a complete message to arrive
-	if (Serial.available() > 1 || (status == WAITING_FOR_MASTER_COMMAND && Serial.available() > 0))
+	if (Serial.available() >= Signal::length ||
+		(status == WAITING_FOR_INFO_MESSAGE && Serial.available() > 0)
+	)
 	{
-		if (status == WAITING_FOR_MASTER_SIGNAL)
-		{
-			// Read an int16_t
-			lastMasterSignal = readInt16();
-			
-			status = WAITING_FOR_MASTER_RESPONCE;
-			
-			sendInt16(calculateSum(lastMasterSignal));
-		}
-		else if (status == WAITING_FOR_MASTER_RESPONCE)
-		{
-			int16_t masterResponce = readInt16();
-			
-			if (masterResponce == ACK)
-			{
-				status = OK_CONTINUE;
-				
-				// Prepair for infomessage
-				if (lastMasterSignal == STX)
-				{
-					status = WAITING_FOR_MASTER_COMMAND;					
-				}
-				
-				if (mode == COMMAND_MODE)
-				{
-					status = WAITING_FOR_MASTER_SIGNAL;
-					mode = SIGNAL_MODE;
-				}
-
-				return;
-			}
-			
-			if (masterResponce == awaitedSum)
-			{
-				sendInt16(ACK);
-				status = IN_TIMEOUT_BUFFER;
-				return;
-			}
-			else
-			{
-				// TODO: Implement
-				sendInt16(VERSION);
-			}
-		}
-		else if (status == WAITING_FOR_MASTER_COMMAND)
-		{
-			String command = Serial.readString();
-			
-			status = WAITING_FOR_MASTER_RESPONCE;
-			mode = COMMAND_MODE;
-			
-			sendInt16(calculateSum(command));
-		}
-		else if (status == IN_TIMEOUT_BUFFER)
-		{
-			int16_t masterResponce = readInt16();
-			
-			if (masterResponce == awaitedSum)
-			{
-				sendInt16(ACK);
-				status = IN_TIMEOUT_BUFFER;
-				return;
-			}
-		}
-	}
-	else if (status == IN_TIMEOUT_BUFFER)
-	{
-		status = OK_CONTINUE;
-	}
+		Signal* recievedSignal;
 	
+		if (status != WAITING_FOR_INFO_MESSAGE)
+		{
+			recievedSignal = readSignal();
+		}
+	
+		switch (status)
+		{
+			case OK_CONTINUE: // Recieved a signal
+				sendSum(recievedSignal->getSum());
+			break;
+			
+			case WAITING_FOR_ACK: // Recieved ACK
+			break;
+			
+			default:
+			break;
+		}
+		
+		delete recievedSignal;
+	}
+	else
+	{
+		switch(status)
+		{
+			case WAITING_FOR_ACK:
+				if (millis() >= sumSentAt + ACK_TIMEOUT)
+				{
+					// ACK didnt arrive, send ABF
+					sendSignal(ABF);
+				}
+			break;
+			
+			default:
+			
+			break;
+		}
+	}
 }
 
 /**
-*	Watches communication timeouts.
+*	Sends a message over Serial.
 *
-*
-*
-void SRL::Slave::watchTimeout(void)
+*	@param message
+*/
+void SRL::Slave::sendSignal(int16_t message)
 {
+	switch (message)
+	{
+		case ACK:
+			
+		break;
+		
+		case ABF:
+			
+		break;
+		
+		default:
+			delete lastSentSignal;
+			lastSentSignal = new Signal(messageId++, message);
+			writeSignal(lastSentSignal);
+			status = WAITING_FOR_ASCII_SUM;
+			awaitedSum = lastSentSignal->getSum();
+		break;
+	}
+}
 
-}*/
+/**
+*	Sends an ASCII sum over Serial.
+*
+*	@param sum
+*/
+void SRL::Slave::sendSum(int16_t sum)
+{
+	writeSignal(&Signal(messageId++, sum));
+	status = WAITING_FOR_ACK;
+	sumSentAt = millis();
+}

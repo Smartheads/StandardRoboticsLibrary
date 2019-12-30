@@ -28,28 +28,59 @@
 
 #define VERSION 1204
 
-#define SOH 1
-#define STX 2
-#define ETX	3
-#define EOT 4
-#define ACK 5
-#define ETB 23
+#define SOH 0x01
+#define STX 0x02
+#define ETX	0x03
+#define EOT 0x04
+#define ABF 0x05
+#define ACK 0x06
+#define ANT 0x07
 
-#define OK_CONTINUE 0
-#define WAITING_FOR_MASTER_SIGNAL 1
-#define WAITING_FOR_MASTER_RESPONCE 2
-#define END_COMMUNICATION 3
-#define WAITING_FOR_MASTER_COMMAND 4
-#define SIGNAL_MODE 5
-#define COMMAND_MODE 6
-#define IN_TIMEOUT_BUFFER 7
+#define OK_CONTINUE 0x00
+#define WAITING_FOR_ASCII_SUM 0x01
+#define IN_ACK_TIMEOUT_BUFFER 0x02
+#define WAITING_FOR_INFO_MESSAGE 0x03
+#define WAITING_FOR_MORE_ABF 0x04
+#define WAITING_FOR_ACK 0x05
+
+#define TIMEOUT 1000L
+#define ABF_INTERVAL 1000L
+#define ACK_WAIT 550L
+#define ACK_TIMEOUT 400L
+#define REFRESH_INTERVAL 10L
 
 namespace SRL
 {
+	
+	class Signal
+	{
+		public:
+			Signal(int16_t messageId, int16_t message);
+			Signal(byte* buffer);
+			~Signal(void);
+			
+			int16_t getMessageId(void);
+			int16_t getMessage(void);
+			
+			void setMessageId(int16_t messageId);
+			void setMessage(int16_t message);
+			
+			int16_t getSum(void);
+			
+			static const int length = 4;
+			
+			byte* getBytes(void);
+		
+		private:
+			byte* sigmem;
+			unsigned long createdAt;
+	};
+	
 	int16_t calculateSum(String str);
 	int16_t calculateSum(int16_t num);
-	void sendInt16(int16_t signal);
-	int16_t readInt16(void);
+	void writeSignal(Signal* sig);
+	Signal* readSignal(void);
+	void clearSerialBuffer(void);
 }
 
 #endif
