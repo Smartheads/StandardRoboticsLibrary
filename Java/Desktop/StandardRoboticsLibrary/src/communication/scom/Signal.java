@@ -50,12 +50,22 @@ public final class Signal
     
     /**
      * 
+     * @param sig 
+     */
+    public Signal(Signal sig)
+    {
+        this.id = sig.getId();
+        this.message = sig.getMessage();
+    }
+    
+    /**
+     * 
      * @param charset
      * @return 
      */
     public short getSum(Charset charset)
     {
-        return SCOM2.calculateSum(message, charset);
+        return SCOM.calculateSum(message, charset);
     }
     
     /**

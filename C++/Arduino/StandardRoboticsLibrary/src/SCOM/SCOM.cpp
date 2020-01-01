@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2018 Robert Hutter
+* Copyright (c) 2020 Robert Hutter
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -30,7 +30,7 @@
 */
 void SRL::writeSignal(Signal* sig)
 {
-	Serial.write(sig->getBytes(), Signal::length);
+	Serial.write(sig->getBytes(), SIGNAL_LENGTH);
 }
 
 /**
@@ -105,7 +105,7 @@ void SRL::clearSerialBuffer(void)
 */
 SRL::Signal::Signal(int16_t messageId, int16_t message)
 {
-	sigmem = new byte[length];
+	sigmem = new byte[SIGNAL_LENGTH];
 	sigmem[0] = message >> 8;
 	sigmem[1] = message;
 	sigmem[2] = messageId >> 8;
@@ -121,6 +121,19 @@ SRL::Signal::Signal(int16_t messageId, int16_t message)
 SRL::Signal::Signal(byte* buffer)
 {
 	this->sigmem = buffer;
+}
+
+/**
+*
+*
+*
+*/
+SRL::Signal::Signal(Signal* sig)
+{
+	sigmem = new byte[SIGNAL_LENGTH];
+	this->createdAt = sig->getCreatedAt();
+	setMessageId(sig->getMessageId());
+	setMessage(sig->getMessage());
 }
 
 /**
@@ -157,6 +170,16 @@ int16_t SRL::Signal::getMessage(void)
 	ret = ret << 8;
 	ret = ret | sigmem[1];
 	return ret;
+}
+
+/**
+*
+*
+*
+*/
+unsigned long SRL::Signal::getCreatedAt(void)
+{
+	return this->createdAt;
 }
 
 /**

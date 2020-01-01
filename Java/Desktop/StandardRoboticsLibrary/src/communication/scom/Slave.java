@@ -20,6 +20,6 @@ package communication.scom;
  *
  * @author deaxuser
  */
-public class Slave2 {
+public class Slave {
     
 }

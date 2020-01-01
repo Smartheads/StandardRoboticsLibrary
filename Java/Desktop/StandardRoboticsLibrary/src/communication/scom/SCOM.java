@@ -28,8 +28,10 @@ import java.util.Arrays;
  * 
  * @author Robert Hutter
  */
-public final class SCOM2
+public final class SCOM
 {
+    final static short VERSION = 1206;
+    
     // Signal messages
     final static short SOH = 0x01;
     final static short STX = 0x02;
@@ -57,8 +59,15 @@ public final class SCOM2
     final static byte WAITING_FOR_ASCII_SUM = 0x01;
     final static byte IN_ACK_TIMEOUT_BUFFER = 0x02;
     final static byte WAITING_FOR_INFO_MESSAGE = 0x03;
-    final static byte WAITING_FOR_MORE_ABF = 0x04;
+    //final static byte WAITING_FOR_MORE_ABF = 0x04;
     final static byte WAITING_FOR_ACK = 0x05;
+    final static byte WAITING_FOR_REP_MESSAGE = 0x06;
+    final static byte WAITING_FOR_ANT = 0x07;
+    final static byte CONNECTION_CLOSED = 0x08;
+    final static byte WAITING_FOR_MORE_ANT = 0x09;
+    final static byte WAITING_FOR_SIGNAL = 0x10;
+    
+    final static byte MAX_ABF_ATTEMPTS = 10;
     
     /**
      *  Calculates the ASCII sum of the input String.

@@ -29,8 +29,10 @@
 */
 SRL::Slave::Slave()
 {
-	status = OK_CONTINUE;
+	status = WAITING_FOR_SIGNAL;
 	messageId = 0;
+	lastSentSignal = NULL;
+	ABF_attempts = 0;
 }
 
 /**
@@ -47,17 +49,22 @@ SRL::Slave::~Slave()
 *
 *	@param baudRate The serial connection's baud rate.
 */
-uint8_t SRL::Slave::openSCOM(unsigned int baudRate)
+uint8_t SRL::Slave::openSCOM(long baudRate)
 {
 	Serial.begin(baudRate);
 	
-	Serial.println("Hello world: " + String(Signal::length, DEC)); 
-	
 	// Wait for SOH signal
-	while(Serial.available() < Signal::length) {Serial.println(Serial.available());delay(100);}
-	do {updateSCOM();} while(status != OK_CONTINUE);
+	while(status != OK_CONTINUE) {updateSCOM();}
 	
-	return true;
+	// Send protocol version
+	sendSignal(VERSION);
+	while(status != OK_CONTINUE) {updateSCOM();}
+	
+	// Get responce
+	status = WAITING_FOR_SIGNAL;
+	while(status != OK_CONTINUE) {updateSCOM();}
+	
+	return lastRecievedSignal->getMessage() == ETX;
 }
 
 /**
@@ -68,7 +75,7 @@ uint8_t SRL::Slave::openSCOM(unsigned int baudRate)
 void SRL::Slave::updateSCOM(void)
 {	
 	// Wait for a complete message to arrive
-	if (Serial.available() >= Signal::length ||
+	if (Serial.available() >= SIGNAL_LENGTH ||
 		(status == WAITING_FOR_INFO_MESSAGE && Serial.available() > 0)
 	)
 	{
@@ -77,15 +84,111 @@ void SRL::Slave::updateSCOM(void)
 		if (status != WAITING_FOR_INFO_MESSAGE)
 		{
 			recievedSignal = readSignal();
+			
+			// Preprocess status
+			switch (status)
+			{
+				case WAITING_FOR_REP_MESSAGE:
+					status = OK_CONTINUE;
+				break;
+				
+				case WAITING_FOR_SIGNAL:
+					status = OK_CONTINUE;
+				break;
+				
+				case WAITING_FOR_MORE_ANT:
+					status = WAITING_FOR_ANT;
+				break;
+				
+				default:
+					break;
+			}
 		}
 	
 		switch (status)
 		{
-			case OK_CONTINUE: // Recieved a signal
-				sendSum(recievedSignal->getSum());
+			// Recieved a signal
+			case OK_CONTINUE:
+				switch (recievedSignal->getMessage())
+				{
+					case ANT:
+						status = WAITING_FOR_MORE_ANT;
+						antRecievedAt = millis();
+					break;
+				
+					case ABF:
+						sendSignal(ANT);
+					break;
+					
+					default:
+						sendSum(recievedSignal->getSum());
+						delete lastRecievedSignal;
+						lastRecievedSignal = new Signal(recievedSignal);
+						delete lastSentSignal;
+						lastSentSignal = NULL;
+					break;
+				}
 			break;
 			
-			case WAITING_FOR_ACK: // Recieved ACK
+			// ACK, ABF or resent message has arrived
+			case WAITING_FOR_ACK:
+				switch (recievedSignal->getMessage())
+				{
+					case ACK:
+						status = OK_CONTINUE;
+					break;
+					
+					case ABF:
+						sendSignal(ANT);
+					break;
+					
+					default:
+						sendSum(recievedSignal->getMessage());
+					
+						delete lastRecievedSignal;
+						lastRecievedSignal = new Signal(recievedSignal);
+					break;
+				}
+			break;
+			
+			// Recieved responce
+			case WAITING_FOR_ASCII_SUM:
+				if (recievedSignal->getMessage() == awaitedSum)
+				{
+					sendSignal(ACK);
+				}
+				else
+				{
+					sendSignal(lastSentSignal->getMessage());
+				}
+			break;
+			
+			// ABF has arrived
+			case IN_ACK_TIMEOUT_BUFFER:
+				if (recievedSignal->getMessage() == ABF)
+				{
+					// Deal with timeout
+					sendSignal(ANT);
+				}
+			break;
+			
+			// ANT or ABF has arrived
+			case WAITING_FOR_ANT:
+				switch(recievedSignal->getMessage())
+				{
+					case ANT:
+						status = WAITING_FOR_MORE_ANT;
+						antRecievedAt = millis();
+					break;
+					
+					case ABF:
+						sendSignal(ANT);
+					break;
+					
+					default:
+						// DEVIATED FROM PROTOCOL
+					break;
+				}
 			break;
 			
 			default:
@@ -94,15 +197,53 @@ void SRL::Slave::updateSCOM(void)
 		
 		delete recievedSignal;
 	}
-	else
+	else // New message did not arrive
 	{
 		switch(status)
 		{
+			case WAITING_FOR_ASCII_SUM:
+				if (millis() >= messageSentAt + TIMEOUT)
+				{
+					// If sum didnt arrive
+					sendSignal(ABF);
+				}
+			break;
+		
 			case WAITING_FOR_ACK:
 				if (millis() >= sumSentAt + ACK_TIMEOUT)
 				{
 					// ACK didnt arrive, send ABF
 					sendSignal(ABF);
+				}
+			break;
+			
+			case IN_ACK_TIMEOUT_BUFFER:
+				if (millis() >= ackSentAt + ACK_TIMEOUT)
+				{
+					status = OK_CONTINUE;
+					delete lastSentSignal;
+					lastSentSignal = NULL;
+				}
+			break;
+			
+			case WAITING_FOR_ANT:
+				if(millis() >= abfSentAt + ABF_INTERVAL)
+				{
+					sendSignal(ABF);
+				}
+			break;
+			
+			case WAITING_FOR_MORE_ANT:
+				if(millis() >= antRecievedAt + REFRESH_INTERVAL)
+				{
+					if (lastSentSignal == NULL)
+					{
+						status = WAITING_FOR_REP_MESSAGE;
+					}
+					else
+					{
+						sendSignal(lastSentSignal->getMessage());
+					}
 				}
 			break;
 			
@@ -123,19 +264,45 @@ void SRL::Slave::sendSignal(int16_t message)
 	switch (message)
 	{
 		case ACK:
-			
+			status = IN_ACK_TIMEOUT_BUFFER;
+			ackSentAt = millis();
+			writeSignal(&Signal(messageId++, message));
 		break;
 		
 		case ABF:
+			if (ABF_attempts++ >= MAX_ABF_ATTEMPTS)
+			{
+				status = CONNECTION_CLOSED;
+			}
+			else
+			{
+				status = WAITING_FOR_ANT;
+				abfSentAt = millis();
+				writeSignal(&Signal(messageId++, message));
+			}
+		break;
+		
+		case ANT:
+			if(lastSentSignal == NULL)
+			{
+				status = WAITING_FOR_REP_MESSAGE;
+			}
+			else
+			{
+				status = WAITING_FOR_MORE_ANT;
+				/*antSentAt*/antRecievedAt = millis();
+			}
 			
+			writeSignal(&Signal(messageId++, message));
 		break;
 		
 		default:
 			delete lastSentSignal;
 			lastSentSignal = new Signal(messageId++, message);
-			writeSignal(lastSentSignal);
 			status = WAITING_FOR_ASCII_SUM;
 			awaitedSum = lastSentSignal->getSum();
+			messageSentAt = lastSentSignal->getCreatedAt();
+			writeSignal(lastSentSignal);
 		break;
 	}
 }
@@ -147,7 +314,7 @@ void SRL::Slave::sendSignal(int16_t message)
 */
 void SRL::Slave::sendSum(int16_t sum)
 {
-	writeSignal(&Signal(messageId++, sum));
 	status = WAITING_FOR_ACK;
 	sumSentAt = millis();
+	writeSignal(&Signal(messageId++, sum));
 }

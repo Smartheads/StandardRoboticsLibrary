@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2019 Robert Hutter
+* Copyright (c) 2020 Robert Hutter
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -34,16 +34,23 @@ namespace SRL
 			Slave(void);
 			~Slave(void);
 			
-			uint8_t openSCOM(unsigned int baudRate);
+			uint8_t openSCOM(long baudRate);
 			void updateSCOM(void);
 			
 		private:
 			Signal* lastSentSignal;
+			Signal* lastRecievedSignal;
 			int16_t awaitedSum;
 			unsigned int status;
+			unsigned int ABF_attempts;
 			int16_t messageId;
 			
+			unsigned long ackSentAt;
 			unsigned long sumSentAt;
+			unsigned long abfSentAt;
+			unsigned long messageSentAt;
+			
+			unsigned long antRecievedAt;
 			
 			void sendSignal(int16_t message);
 			void sendSum(int16_t sum);

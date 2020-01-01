@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019 Robert Hutter
+ * Copyright (C) 2020 Robert Hutter
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -19,384 +19,413 @@ package communication.scom;
 import com.fazecast.jSerialComm.SerialPort;
 import com.fazecast.jSerialComm.SerialPortDataListener;
 import com.fazecast.jSerialComm.SerialPortEvent;
+import exceptions.ConnectionClosedException;
 import exceptions.ConnectionTimeoutException;
 import exceptions.IncompatibleProtocolVersionException;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
- *  Master.java - SCOM Communication master.
+ *  Erstellt laut des SCOM 2.0 Protokolls 1204.
  * 
- * @see SCOM1204
- * @since 2019.10.26
- * @author deaxuser - Robert Hutter
+ * @author Robert Hutter
  */
-public /*final*/ class Master implements SerialPortDataListener
+public class Master implements Runnable, SerialPortDataListener
 {
     SerialPort port;
-    
-    private volatile int status;
-    private volatile int awaitedSum;
-    private volatile short lastSignal;
-    private volatile Command lastCommand;
-    private volatile int failedAttempts;
-    
-    private volatile short lastSlaveSignal;
-    private volatile long messageId;
-    
     private final Charset charset;
+    private short messageId = 0;
+    private volatile byte status = SCOM.OK_CONTINUE;
+    private volatile Signal lastSentSignal;
+    private volatile Signal lastRecievedSignal = null; // Confirmed signal
+    private volatile short awaitedSum;
+    private volatile byte ABF_attempts = 0;
     
-    private final static int COMMUNICATION_ENDED = -2;
-    private final static int NONE = -1;
-    private final static int WAITING_FOR_SLAVE_SIGNAL = 1;
-    private final static int WAITING_FOR_SLAVE_RESPONCE = 2;
-    private final static int RECOVERING_WRONG_SLAVE_RESPONCE = 3;
-    private final static int OK_CONTINUE = 0;
-    
-    private final static int MAX_ATTEMPTS = 10;
-    private final static short VERSION = 1204;
-    private final static short SOH = 1;
-    private final static short STX = 2;
-    private final static short ETX = 3;
-    private final static short EOT = 4;
-    private final static short ACK = 5;
-    private final static short ETB = 23;
+    private volatile long ACK_signal_sent_at;
+    private volatile long ABF_signal_sent_at;
+    //private volatile long ANT_signal_sent_at;
+    private volatile long ANT_signal_recieved_at;
+    private volatile long sum_sent_at;
+    private volatile long lastMessageSentAt;
     
     /**
-     *  Constructor for SCOM Master
      * 
-     * @param portDesc  Serial port name.
-     * @param baudRate  Serial port baud rate.
-     * @param charset   Serial port communication character set.
+     * @param port
+     * @param baud
+     * @param charset 
      */
-    public Master(String portDesc, int baudRate, String charset)
+    public Master(SerialPort port, int baud, String charset)
     {
-        this.failedAttempts = 0;
-        port = SerialPort.getCommPort(portDesc);
-        port.setBaudRate(baudRate);
-        this.charset = Charset.forName(charset);
-    }
-    
-    /**
-     *  Constructor for SCOM Master.
-     * 
-     * @param port  Serial port.
-     * @param baudRate Serial port baud rate.
-     * @param charset   Serial port communication character set.
-     */
-    public Master(SerialPort port, int baudRate, String charset)
-    {
-        this.failedAttempts = 0;
         this.port = port;
-        this.port.setBaudRate(baudRate);
+        this.port.setBaudRate(baud);
         this.charset = Charset.forName(charset);
     }
     
     /**
-     *  Sends a coammnd over Serial,
      * 
-     * @param command
-     * @throws exceptions.ConnectionTimeoutException
-     * @see SCOM Protocol
+     * @param port
+     * @param baud
+     * @param charset 
      */
-    public void sendCommand(Command command) throws ConnectionTimeoutException
+    public Master(String port, int baud, String charset)
     {
-        sendSignal(STX);
-        while(status != OK_CONTINUE) {watchTimeout();}
-        
-        writeInfoMessage(command.toString());
-        awaitedSum = calculateSum(command.toString());
-        
-        // Wait for responce
-        status = WAITING_FOR_SLAVE_RESPONCE;
-        lastSignal = NONE;
-        while(status != OK_CONTINUE) {watchTimeout();}
-        
-        sendSignal(ETX);
-        while(status != OK_CONTINUE) {watchTimeout();}
+        this(SerialPort.getCommPort(port), baud, charset);
     }
     
     /**
-     *  Opens serial communication.
      * 
-     * @throws exceptions.ConnectionTimeoutException
-     * @see SCOM Protocol
-     * @throws exceptions.IncompatibleProtocolVersionException
+     * @param port
+     * @param baud 
      */
-    public void open() throws IncompatibleProtocolVersionException, ConnectionTimeoutException
+    public Master(String port, int baud)
     {
-        port.openPort();
-        port.addDataListener(this);
-        
-        sendSignal(SOH);
-        do {watchTimeout();} while(status != OK_CONTINUE);
-        
-        sendSignal(VERSION);
-        do {watchTimeout();} while(status != OK_CONTINUE);
-        
-        status = WAITING_FOR_SLAVE_SIGNAL;
-        do {watchTimeout();} while(status != OK_CONTINUE);
-        
-        if (lastSlaveSignal != VERSION)
-        {
-            sendSignal(EOT);
-            while(status != OK_CONTINUE) {watchTimeout();}
-            throw new exceptions.IncompatibleProtocolVersionException();
-        }
-        else
-        {
-            sendSignal(ETB);
-            while(status != OK_CONTINUE) {watchTimeout();}
-        }
+        this(port, baud, "ASCII");
     }
     
     /**
-     *  Closes serial communication.
+     * 
+     * @param port 
      */
-    public void close()
+    public Master(String port)
     {
-        status = COMMUNICATION_ENDED;
-        writeInt16(EOT);
-        port.closePort();
+        this(port, 115200);
     }
     
     /**
-     *  Calculates the ASCII sum of the input String.
-     * 
-     * @see SCOM1204
-     * @param str String to calculate ASCII sum of.
-     * @return 
+     * Opens the Serial port and starts communication.
      */
-    private int calculateSum(String str)
-    {
-        byte[] b = str.getBytes(charset);
-        
-        int sum = 0;
-        for (byte k : b)
-        {
-            sum += k;
-        }
-        
-        return sum;
-    }
-    
-    /**
-     * Sends 2 bytes of data over on serial in form of short.
-     * 
-     * @param i 2 Byte variable to send.
-     */
-    private void writeInt16(int i)
-    {
-        byte[] b = ByteBuffer.allocate(2).putShort((short)i).array();
-        //System.out.println("Sent: "+Arrays.toString(b));
-        port.writeBytes(b, 2);
-    }
-    
-    /**
-     * Sends a string over serial.
-     * 
-     * @param str 
-     */
-    private void writeInfoMessage(String str)
-    {
-        messageId = System.nanoTime();
-        byte[] buff = str.getBytes(charset);
-        this.port.writeBytes(buff, buff.length);
-    }
-    
-    /**
-     * Sends a signal to the Slave.
-     * 
-     * @see SCOM1204
-     * @param i The signal identifier.
-     */
-    private void sendSignal(short i)
-    {
-       lastSignal = i;
-       messageId =  System.nanoTime();
-       status = WAITING_FOR_SLAVE_RESPONCE;
-       awaitedSum = calculateSum(Integer.toString(i));
-       writeInt16(i);
-       System.out.println("Sent signal: ["+i+"]");
-    }
-
     @Override
-    public int getListeningEvents() {
-        return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
-    }
-
-    @Override
-    public void serialEvent(SerialPortEvent event) {
-        System.out.println("Received: "+Arrays.toString(event.getReceivedData()));
-        
-        if (event.getReceivedData().length > 1)
+    public void run()
+    {
+        try
         {
-            if (status == WAITING_FOR_SLAVE_RESPONCE)
+            port.openPort();
+            port.addDataListener(this);
+            
+            // Wait for Slave to turn on if activated by opening of serial port
+            try
             {
-                // Clear buffer by reading all bytes
-                ByteBuffer cb = ByteBuffer.allocate(event.getReceivedData().length);
-                cb.put(event.getReceivedData());
+                Thread.sleep(500);
+            }
+            catch (InterruptedException ex)
+            {
+                Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+            }
+            
+            // Send SOH
+            sendSignal(SCOM.SOH);
+            while(status != SCOM.OK_CONTINUE) {updateSCOM();}
+            
+            // Recieve Slave version
+            status = SCOM.WAITING_FOR_SIGNAL;
+            while(status != SCOM.OK_CONTINUE || lastRecievedSignal == null) {updateSCOM();}
+            short slaveVersion = lastRecievedSignal.getMessage();
+            
+            // Compare versions
+            if (SCOM.VERSION != slaveVersion)
+            {
+                // Shut down: send EOT
+                sendSignal(SCOM.EOT);
+                while(status != SCOM.OK_CONTINUE) {updateSCOM();}
+                throw new exceptions.IncompatibleProtocolVersionException();
+            }
+            else
+            {
+                lastRecievedSignal = null;
+                // Send ETX
+                sendSignal(SCOM.ETX);
+                while(status != SCOM.OK_CONTINUE) {updateSCOM();}
+            }
+        }
+        catch (ConnectionTimeoutException | IncompatibleProtocolVersionException
+                | ConnectionClosedException ex
+              )
+        {
+            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+            status = SCOM.CONNECTION_CLOSED;
+        }
+    }
+    
+    /**
+     * 
+     */
+    void updateSCOM(SerialPortEvent event) throws ConnectionTimeoutException, ConnectionClosedException
+    {
+        // Check if new data has arrived
+        if(event != null)
+        {
+            // New data has arrived
+            if (event.getReceivedData().length >= Signal.length ||
+                    (status == SCOM.WAITING_FOR_INFO_MESSAGE && event.getReceivedData().length > 0)
+                )
+            {
+                Signal recievedSignal = null;
                 
-                // Take first two bytes and compile a signal
-                ByteBuffer bb = ByteBuffer.allocate(2);
-                bb.put(cb.get(0));
-                bb.put(cb.get(1));
-                
-                short responce = bb.getShort(0);
-                System.out.println("Recived responce: ["+responce+"]");
-                
-                if (responce == ACK)
+                if (status != SCOM.WAITING_FOR_INFO_MESSAGE)
                 {
-                    status = OK_CONTINUE;
-                    System.out.println("SUCCESS");
-                    return;
-                }
-
-                if (responce == awaitedSum)
-                {
-                    // Send ACK signal
-                    writeInt16(ACK);
-                    messageId = System.nanoTime();
-                    status = OK_CONTINUE;
-                    failedAttempts = 0;
-                    System.out.println("SUCCESS");
+                    recievedSignal = SCOM.readSignal(event);
+                    
+                    // Preprocess status
+                    switch (status)
+                    {
+                        case SCOM.WAITING_FOR_SIGNAL:
+                            status = SCOM.OK_CONTINUE;
+                        break;
+                        
+                        case SCOM.WAITING_FOR_REP_MESSAGE:
+                            status = SCOM.OK_CONTINUE;
+                        break;
+                        
+                        case SCOM.WAITING_FOR_MORE_ANT:
+                            status = SCOM.OK_CONTINUE;
+                        break;
+                        
+                        default:
+                            break;
+                    }
                 }
                 else
                 {
-                    // Kill current timeout handling function
-                    status = RECOVERING_WRONG_SLAVE_RESPONCE;
-                    try
-                    {
-                        Thread.sleep(20);
-                    }
-                    catch (InterruptedException ex)
-                    {
-                        Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
-                    }
-                    status = WAITING_FOR_SLAVE_RESPONCE;
-                    
-                    if (failedAttempts < MAX_ATTEMPTS)
-                    {
-                        if (lastSignal != NONE) // NONE if last message was an info message.
+                    // TODO: Implement info message
+                }
+                
+                // A message has arrived
+                switch (status)
+                {
+                    // A message has arrived
+                    case SCOM.OK_CONTINUE:
+                        switch (recievedSignal.getMessage())
                         {
-                            writeInt16(lastSignal);
+                            case SCOM.ANT:
+                                status = SCOM.WAITING_FOR_MORE_ANT;
+                                ANT_signal_recieved_at = System.currentTimeMillis();
+                            break;
+                            
+                            case SCOM.ABF:
+                                sendSignal(SCOM.ANT);
+                            break;
+                            
+                            default:
+                                sendSum(recievedSignal.getSum(charset));
+                                lastRecievedSignal = new Signal(recievedSignal);
+                            break;
+                        }
+                    break;
+                    
+                    // ACK, ABF or resent message has arrived
+                    case SCOM.WAITING_FOR_ACK:
+                        switch (recievedSignal.getMessage())
+                        {
+                            case SCOM.ACK:
+                                status = SCOM.OK_CONTINUE;
+                            break;
+                            
+                            case SCOM.ABF:
+                                sendSignal(SCOM.ANT);
+                            break;
+                            
+                            default:
+                                sendSum(recievedSignal.getSum(charset));
+                                lastRecievedSignal = new Signal(recievedSignal);
+                            break;
+                        }
+                    break;
+                    
+                    // Confirmation sum has arrived
+                    case SCOM.WAITING_FOR_ASCII_SUM:
+                        // If ASCII sum is correct
+                        if (recievedSignal.getMessage() == awaitedSum)
+                        {
+                            sendSignal(SCOM.ACK);
+                            lastSentSignal = null;
                         }
                         else
                         {
-                            writeInfoMessage(lastCommand.toString());
+                            sendSignal(lastSentSignal.getMessage());
                         }
+                    break;
                         
-                        // Run timeout handler
-                        try
+                    // ABF has arrived
+                    case SCOM.IN_ACK_TIMEOUT_BUFFER:
+                        if (recievedSignal.getMessage() == SCOM.ABF)
                         {
-                            watchTimeout();
+                            // Deal with ACK timeout
+                            sendSignal(SCOM.ANT);
                         }
-                        catch (ConnectionTimeoutException ex)
+                    break;
+                    
+                    // ANT or ABF has arrived
+                    case SCOM.WAITING_FOR_ANT:
+                        switch(recievedSignal.getMessage())
                         {
-                            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+                            case SCOM.ANT:
+                                status = SCOM.WAITING_FOR_MORE_ANT;
+                                ANT_signal_recieved_at = System.currentTimeMillis();
+                            break;
+                            
+                            case SCOM.ABF:
+                                sendSignal(SCOM.ANT);
+                            break;
+                            
+                            default:
+                                throw new exceptions.ConnectionClosedException("Deviated from protcol");
                         }
+                    break;
                         
-                        failedAttempts++;
-                    }
-                    else
-                    {
-                        close();
-                    }
+                    default:
+                        
+                    break;
                 }
             }
-            else if (status == WAITING_FOR_SLAVE_SIGNAL)
+        }
+        else
+        {
+            switch(status)
             {
-                // Parse recived bytes
-                ByteBuffer bb = ByteBuffer.allocate(2);
-                bb.put(event.getReceivedData()[0]);
-                bb.put(event.getReceivedData()[1]);
-                short signal = bb.getShort(0);
-                
-                lastSlaveSignal = signal;
-                
-                // Send responce
-                lastSignal = (short) calculateSum(Short.toString(signal));
-                messageId =  System.nanoTime();
-                writeInt16(lastSignal);
-                System.out.println(lastSignal);
-                status = WAITING_FOR_SLAVE_RESPONCE;
-            }
-            else
-            {
-                // Read signal
-                ByteBuffer bb = ByteBuffer.allocate(2);
-                bb.put(event.getReceivedData()[0]);
-                bb.put(event.getReceivedData()[1]);
-                short signal = bb.getShort(0);
-                
-                // If sent within timeout buffer
-                if (System.nanoTime() <= messageId + 250)
-                {
-                    if (signal == awaitedSum)
+                case SCOM.WAITING_FOR_ACK:
+                    if (System.currentTimeMillis() >= sum_sent_at + SCOM.ACK_TIMEOUT)
                     {
-                        // Send ACK signal
-                        writeInt16(ACK);
-                        messageId = System.nanoTime();
-                        status = OK_CONTINUE;
-                        failedAttempts = 0;
-                        System.out.println("SUCCESS");
+                        // Did'nt recieved ACK
+                        sendSignal(SCOM.ABF);
                     }
-                }
+                break;
+                
+                case SCOM.WAITING_FOR_ASCII_SUM:
+                    if (System.currentTimeMillis() >= lastMessageSentAt + SCOM.TIMEOUT)
+                    {
+                        // Timeout detected
+                        sendSignal(SCOM.ABF);
+                    }
+                break;
+                
+                case SCOM.IN_ACK_TIMEOUT_BUFFER:
+                    if (System.currentTimeMillis() >= ACK_signal_sent_at + SCOM.ACK_WAIT)
+                    {
+                        // ACK recieved, set status to ok_continue
+                        status = SCOM.OK_CONTINUE;
+                    }
+                break;
+                
+                case SCOM.WAITING_FOR_ANT:
+                    if (System.currentTimeMillis() >= ABF_signal_sent_at + SCOM.ABF_INTERVAL)
+                    {
+                        // Send new ABF
+                        sendSignal(SCOM.ABF);
+                    }
+                break;
+                
+                case SCOM.WAITING_FOR_MORE_ANT:
+                    if (System.currentTimeMillis() >= ANT_signal_recieved_at + SCOM.REFRESH_INTERVAL)
+                    {
+                        // All ANTs have arrived
+                        ABF_attempts = 0;
+                        if (lastSentSignal != null)
+                        {
+                            sendSignal(lastSentSignal.getMessage()); // Resend last message
+                        }
+                        else
+                        {
+                            status = SCOM.WAITING_FOR_REP_MESSAGE;
+                        }
+                    }
+                break;
+                    
+                default:
+                break;
             }
         }
     }
-
+    
     /**
-     *  Handels timeouts and other time based operations
      * 
-     * @throws exceptions.ConnectionTimeoutException
      */
-    private void watchTimeout() throws ConnectionTimeoutException
+    void updateSCOM() throws ConnectionTimeoutException, ConnectionClosedException
     {
-        long tracedMessage = messageId;
-        for (int i = 0; i < MAX_ATTEMPTS; i++)
+        updateSCOM(null);
+    }
+    
+    /**
+     * Sends a signal.
+     * 
+     * @param message 
+     */
+    private void sendSignal(short message) throws ConnectionTimeoutException
+    {
+        switch (message)
         {
-            // Wait one second, but constantly check for responce meanwhile
-            for (int x = 0; x < 100; x++)
-            {
-                try
-                {
-                    Thread.sleep(10);
-                }
-                catch (InterruptedException e)
-                {
-                    Logger.getLogger(Master.class.getName()).log(Level.SEVERE, "Error sleeping thread.");
-                }
-
-                // Return if no longer waiting for responce
-                if (status != WAITING_FOR_SLAVE_RESPONCE)
-                {
-                    return;
-                }
-            }
+            case SCOM.ACK:
+                status = SCOM.IN_ACK_TIMEOUT_BUFFER;
+                ACK_signal_sent_at = System.currentTimeMillis();
+                SCOM.writeSignal(new Signal(messageId++, message), port);
+            break;
             
-            // Resend message
-            if (tracedMessage == messageId)
-            {
-                if (lastSignal == NONE)
+            case SCOM.ABF:
+                if (ABF_attempts++ >= SCOM.MAX_ABF_ATTEMPTS)
                 {
-                    writeInfoMessage(lastCommand.toString());
+                    throw new exceptions.ConnectionTimeoutException();
+                }
+                status = SCOM.WAITING_FOR_ANT;
+                ABF_signal_sent_at = System.currentTimeMillis();
+                SCOM.writeSignal(new Signal(messageId++, message), port);
+            break;
+            
+            case SCOM.ANT:
+                if (lastRecievedSignal != null)
+                {
+                    status = SCOM.WAITING_FOR_REP_MESSAGE;
                 }
                 else
                 {
-                    sendSignal(lastSignal);
+                    status = SCOM.WAITING_FOR_MORE_ANT;
+                    ANT_signal_recieved_at/*ANT_signal_sent_at*/ = System.currentTimeMillis();
                 }
-                tracedMessage = messageId;
-            }
-            else
-            {
-                // Return if already moved onto new message
-                return;
-            }
+                SCOM.writeSignal(new Signal(messageId++, message), port);
+            break;
+            
+            default:
+                lastSentSignal = new Signal(messageId++, message);
+                status = SCOM.WAITING_FOR_ASCII_SUM;
+                awaitedSum = lastSentSignal.getSum(charset);
+                lastMessageSentAt = lastSentSignal.createdAt;
+                SCOM.writeSignal(lastSentSignal, port);
+            break;
         }
-        throw new ConnectionTimeoutException();
+    }
+    
+    /**
+     * Sends an ASCII sum over serial.
+     * 
+     * @param sum 
+     */
+    private void sendSum(short sum)
+    {
+        status = SCOM.WAITING_FOR_ACK;
+        sum_sent_at = System.currentTimeMillis();
+        SCOM.writeSignal(new Signal(messageId++, sum), port);
+    }
+
+    /**
+     * 
+     * @param event
+     */
+    @Override
+    public void serialEvent(SerialPortEvent event)
+    {
+        try
+        {
+            this.updateSCOM(event);
+        }
+        catch (ConnectionTimeoutException | ConnectionClosedException ex)
+        {
+            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+            status = SCOM.CONNECTION_CLOSED;
+        }
+    }
+    
+    @Override
+    public int getListeningEvents()
+    {
+        return SerialPort.LISTENING_EVENT_DATA_RECEIVED;
     }
 }

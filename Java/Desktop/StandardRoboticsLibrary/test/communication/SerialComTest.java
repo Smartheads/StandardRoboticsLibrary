@@ -16,12 +16,7 @@
  */
 package communication;
 
-import communication.scom.Command;
-import communication.scom.Master2;
-import exceptions.ConnectionTimeoutException;
-import exceptions.IncompatibleProtocolVersionException;
-import java.util.logging.Level;
-import java.util.logging.Logger;
+import communication.scom.Master;
 
 /**
  *
@@ -34,7 +29,7 @@ public class SerialComTest {
      */
     public static void main(String[] args) {
         // TODO code application logic here
-        Master2 master = new Master2("ttyUSB0", 115200, "ascii");
+        Master master = new Master("ttyUSB0", 115200, "ascii");
         Thread th = new Thread(master);
         th.start();
     }
