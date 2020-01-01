@@ -40,6 +40,8 @@ namespace SRL
 		private:
 			Signal* lastSentSignal;
 			Signal* lastRecievedSignal;
+			InfoMessage* lastSentInfoMessage;
+			InfoMessage* lastRecievedInfoMessage;
 			int16_t awaitedSum;
 			unsigned int status;
 			unsigned int ABF_attempts;

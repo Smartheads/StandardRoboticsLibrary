@@ -17,6 +17,8 @@
 package communication;
 
 import communication.scom.Master;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -28,9 +30,18 @@ public class SerialComTest {
      * @param args the command line arguments
      */
     public static void main(String[] args) {
-        // TODO code application logic here
-        Master master = new Master("ttyUSB0", 115200, "ascii");
-        Thread th = new Thread(master);
-        th.start();
+        try
+        {
+            Master master = new Master("ttyUSB0", 115200, "ascii");
+            Thread th = new Thread(master);
+            th.start();
+            
+            master.waitUntilSetupComplete();
+            System.out.println("Setup complete");
+        }
+        catch (Exception ex)
+        {
+            Logger.getLogger(SerialComTest.class.getName()).log(Level.SEVERE, null, ex);
+        }
     }
 }

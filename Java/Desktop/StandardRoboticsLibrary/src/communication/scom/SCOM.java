@@ -23,7 +23,7 @@ import java.nio.charset.Charset;
 import java.util.Arrays;
 
 /**
- * Erstellt laut des SCOM Protokolls 1204.
+ * Erstellt laut des SCOM 2.0 Protokolls.
  * Contains general functions to support SCOM.
  * 
  * @author Robert Hutter

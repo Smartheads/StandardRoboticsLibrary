@@ -84,10 +84,24 @@ namespace SRL
 			unsigned long createdAt;
 	};
 	
+	class InfoMessage
+	{
+		public:
+			InfoMessage(String message);
+			InfoMessage(InfoMessage* msg);
+			
+			String getMessage();
+			int16_t getSum(void);
+			
+		private:
+			String message;
+	};
+	
 	int16_t calculateSum(String str);
 	int16_t calculateSum(int16_t num);
 	void writeSignal(Signal* sig);
 	Signal* readSignal(void);
+	InfoMessage* readInfoMessage(void);
 	void clearSerialBuffer(void);
 }
 

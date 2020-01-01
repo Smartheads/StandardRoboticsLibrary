@@ -49,6 +49,9 @@ public class Master implements Runnable, SerialPortDataListener
     private volatile long sum_sent_at;
     private volatile long lastMessageSentAt;
     
+    private volatile boolean setupComplete = false;
+    private volatile Exception setupException;
+    
     /**
      * 
      * @param port
@@ -90,6 +93,37 @@ public class Master implements Runnable, SerialPortDataListener
     public Master(String port)
     {
         this(port, 115200);
+    }
+    
+    /**
+     * 
+     * @throws Exception 
+     */
+    public void waitUntilSetupComplete() throws Exception
+    {
+        while(!setupComplete)
+        {
+            try
+            {
+                Thread.sleep(100);
+            }
+            catch (InterruptedException ex)
+            {
+                Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+            }
+        }
+        
+        if (status == SCOM.CONNECTION_CLOSED)
+            throw setupException;
+        
+    }
+    
+    /**
+     * Closes the SCOM communication
+     */
+    public void closeConnection()
+    {
+        
     }
     
     /**
@@ -144,7 +178,10 @@ public class Master implements Runnable, SerialPortDataListener
         {
             Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
             status = SCOM.CONNECTION_CLOSED;
+            setupException = ex;
+            port.closePort();
         }
+        setupComplete = true;
     }
     
     /**
@@ -237,8 +274,8 @@ public class Master implements Runnable, SerialPortDataListener
                         // If ASCII sum is correct
                         if (recievedSignal.getMessage() == awaitedSum)
                         {
-                            sendSignal(SCOM.ACK);
                             lastSentSignal = null;
+                            sendSignal(SCOM.ACK);
                         }
                         else
                         {
@@ -252,6 +289,12 @@ public class Master implements Runnable, SerialPortDataListener
                         {
                             // Deal with ACK timeout
                             sendSignal(SCOM.ANT);
+                        }
+                        else
+                        {
+                // TEMP
+                            sendSum(recievedSignal.getSum(charset));
+                                lastRecievedSignal = new Signal(recievedSignal);
                         }
                     break;
                     
@@ -269,7 +312,8 @@ public class Master implements Runnable, SerialPortDataListener
                             break;
                             
                             default:
-                                throw new exceptions.ConnectionClosedException("Deviated from protcol");
+                                sendSignal(SCOM.ABF);
+                            break;
                         }
                     break;
                         
@@ -346,7 +390,7 @@ public class Master implements Runnable, SerialPortDataListener
     }
     
     /**
-     * Sends a signal.
+     * Sends a sign_ACK_TIMEOUT_BUFFERal.
      * 
      * @param message 
      */
@@ -420,6 +464,8 @@ public class Master implements Runnable, SerialPortDataListener
         {
             Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
             status = SCOM.CONNECTION_CLOSED;
+            setupComplete = true;
+            port.closePort();
         }
     }
     

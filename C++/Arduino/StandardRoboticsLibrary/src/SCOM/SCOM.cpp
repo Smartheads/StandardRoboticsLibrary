@@ -56,6 +56,16 @@ SRL::Signal* SRL::readSignal(void)
 }
 
 /**
+*  Reads an info message from the Serial Buffer.
+*
+*
+*/
+SRL::InfoMessage* SRL::readInfoMessage(void)
+{	
+	return new InfoMessage(Serial.readString());
+}
+
+/**
 *	Returns the ASCII sum of a string.
 *	Tested. Works 100%.
 *
@@ -223,4 +233,44 @@ int16_t SRL::Signal::getSum(void)
 byte* SRL::Signal::getBytes(void)
 {
 	return sigmem;
+}
+
+/**
+*
+*
+*
+*/
+SRL::InfoMessage::InfoMessage(String message)
+{
+	this->message = message;
+}
+
+/**
+*
+*
+*
+*/
+SRL::InfoMessage::InfoMessage(InfoMessage* msg)
+{
+	this->message = msg->getMessage();
+}
+
+/**
+*
+*
+* @return
+*/
+String SRL::InfoMessage::getMessage(void)
+{
+	return this->message;
+}
+
+/**
+*
+*
+*
+*/
+int16_t SRL::InfoMessage::getSum(void)
+{
+	return calculateSum(this->message);
 }

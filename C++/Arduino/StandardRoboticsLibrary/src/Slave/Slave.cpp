@@ -32,6 +32,7 @@ SRL::Slave::Slave()
 	status = WAITING_FOR_SIGNAL;
 	messageId = 0;
 	lastSentSignal = NULL;
+	lastSentInfoMessage = NULL;
 	ABF_attempts = 0;
 }
 
@@ -41,7 +42,10 @@ SRL::Slave::Slave()
 */
 SRL::Slave::~Slave()
 {
-
+	delete lastSentSignal;
+	delete lastRecievedSignal;
+	delete lastSentInfoMessage;
+	delete lastRecievedInfoMessage;
 }
 
 /**
@@ -80,6 +84,7 @@ void SRL::Slave::updateSCOM(void)
 	)
 	{
 		Signal* recievedSignal;
+		InfoMessage* recievedInfoMessage;
 	
 		if (status != WAITING_FOR_INFO_MESSAGE)
 		{
@@ -103,6 +108,10 @@ void SRL::Slave::updateSCOM(void)
 				default:
 					break;
 			}
+		}
+		else
+		{
+			recievedInfoMessage = readInfoMessage();
 		}
 	
 		switch (status)
@@ -130,12 +139,31 @@ void SRL::Slave::updateSCOM(void)
 				}
 			break;
 			
+			case WAITING_FOR_INFO_MESSAGE:
+				sendSum(recievedInfoMessage->getSum());
+				delete lastRecievedSignal;
+				lastRecievedInfoMessage = new InfoMessage(recievedInfoMessage);
+				delete lastSentInfoMessage;
+				lastSentInfoMessage = NULL;
+				
+			break;
+			
 			// ACK, ABF or resent message has arrived
 			case WAITING_FOR_ACK:
 				switch (recievedSignal->getMessage())
 				{
 					case ACK:
 						status = OK_CONTINUE;
+						
+						/*if (lastRecievedSignal->getMessage() == STX)
+						{
+							status = WAITING_FOR_INFO_MESSAGE;
+						}
+						
+						if (lastRecievedInfoMessage != NULL)
+						{
+							// Do something with confirmed infoMessage
+						}*/
 					break;
 					
 					case ABF:
@@ -186,7 +214,7 @@ void SRL::Slave::updateSCOM(void)
 					break;
 					
 					default:
-						// DEVIATED FROM PROTOCOL
+						sendSignal(ABF);
 					break;
 				}
 			break;
@@ -196,6 +224,7 @@ void SRL::Slave::updateSCOM(void)
 		}
 		
 		delete recievedSignal;
+		delete recievedInfoMessage;
 	}
 	else // New message did not arrive
 	{
