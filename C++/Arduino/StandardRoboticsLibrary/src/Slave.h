@@ -51,6 +51,7 @@ namespace SRL
 			unsigned long sumSentAt;
 			unsigned long abfSentAt;
 			unsigned long messageSentAt;
+			unsigned long waitingForSignalFrom;
 			
 			unsigned long antRecievedAt;
 			

@@ -48,6 +48,7 @@ public class Master implements Runnable, SerialPortDataListener
     private volatile long ANT_signal_recieved_at;
     private volatile long sum_sent_at;
     private volatile long lastMessageSentAt;
+    private volatile long waitingForSignalFrom;
     
     private volatile boolean setupComplete = false;
     private volatile Exception setupException;
@@ -123,7 +124,7 @@ public class Master implements Runnable, SerialPortDataListener
      */
     public void closeConnection()
     {
-        
+        port.closePort();
     }
     
     /**
@@ -153,6 +154,7 @@ public class Master implements Runnable, SerialPortDataListener
             
             // Recieve Slave version
             status = SCOM.WAITING_FOR_SIGNAL;
+            waitingForSignalFrom = System.currentTimeMillis();
             while(status != SCOM.OK_CONTINUE || lastRecievedSignal == null) {updateSCOM();}
             short slaveVersion = lastRecievedSignal.getMessage();
             
@@ -176,7 +178,7 @@ public class Master implements Runnable, SerialPortDataListener
                 | ConnectionClosedException ex
               )
         {
-            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, null, ex);
+            Logger.getLogger(Master.class.getName()).log(Level.SEVERE, "FATAL", ex);
             status = SCOM.CONNECTION_CLOSED;
             setupException = ex;
             port.closePort();
@@ -202,6 +204,8 @@ public class Master implements Runnable, SerialPortDataListener
                 if (status != SCOM.WAITING_FOR_INFO_MESSAGE)
                 {
                     recievedSignal = SCOM.readSignal(event);
+                    
+                    messageId = (short) (recievedSignal.getId() >= messageId ? (recievedSignal.getId()+1) : messageId);
                     
                     // Preprocess status
                     switch (status)
@@ -372,6 +376,13 @@ public class Master implements Runnable, SerialPortDataListener
                         {
                             status = SCOM.WAITING_FOR_REP_MESSAGE;
                         }
+                    }
+                break;
+                
+                case SCOM.WAITING_FOR_SIGNAL:
+                    if (System.currentTimeMillis() >= waitingForSignalFrom + SCOM.SIGNAL_TIMEOUT)
+                    {
+                        throw new exceptions.ConnectionTimeoutException();
                     }
                 break;
                     

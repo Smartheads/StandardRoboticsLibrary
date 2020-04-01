@@ -42,6 +42,7 @@ public final class SCOM
     final static short ANT = 0x07;
     
     // Timing values
+    final static long SIGNAL_TIMEOUT = 10000L;
     final static long TIMEOUT = 1000L;
     final static long ABF_INTERVAL = 1000L;
     /**

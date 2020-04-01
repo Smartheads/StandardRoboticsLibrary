@@ -32,12 +32,14 @@ public class SerialComTest {
     public static void main(String[] args) {
         try
         {
-            Master master = new Master("ttyUSB0", 115200, "ascii");
+            Master master = new Master("ttyACM0", 115200, "ascii");
             Thread th = new Thread(master);
             th.start();
             
             master.waitUntilSetupComplete();
             System.out.println("Setup complete");
+            
+            master.closeConnection();
         }
         catch (Exception ex)
         {

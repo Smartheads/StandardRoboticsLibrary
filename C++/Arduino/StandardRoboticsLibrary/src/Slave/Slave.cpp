@@ -30,6 +30,7 @@
 SRL::Slave::Slave()
 {
 	status = WAITING_FOR_SIGNAL;
+	waitingForSignalFrom = 0L;
 	messageId = 0;
 	lastSentSignal = NULL;
 	lastSentInfoMessage = NULL;
@@ -49,7 +50,7 @@ SRL::Slave::~Slave()
 }
 
 /**
-*	Open the SCOM communication. Waits for the master.
+*	Open the SCOM communication. Waits for the master to send SOH signal.
 *
 *	@param baudRate The serial connection's baud rate.
 */
@@ -58,14 +59,25 @@ uint8_t SRL::Slave::openSCOM(long baudRate)
 	Serial.begin(baudRate);
 	
 	// Wait for SOH signal
-	while(status != OK_CONTINUE) {updateSCOM();}
+	while(status != OK_CONTINUE && status != CONNECTION_CLOSED) {updateSCOM();}
+	
+	if (status == CONNECTION_CLOSED)
+	{
+		return false;
+	}
 	
 	// Send protocol version
 	sendSignal(VERSION);
-	while(status != OK_CONTINUE) {updateSCOM();}
+	while(status != OK_CONTINUE && status != CONNECTION_CLOSED) {updateSCOM();}
+	
+	if (status == CONNECTION_CLOSED)
+	{
+		return false;
+	}
 	
 	// Get responce
 	status = WAITING_FOR_SIGNAL;
+	waitingForSignalFrom = millis();
 	while(status != OK_CONTINUE) {updateSCOM();}
 	
 	return lastRecievedSignal->getMessage() == ETX;
@@ -89,6 +101,11 @@ void SRL::Slave::updateSCOM(void)
 		if (status != WAITING_FOR_INFO_MESSAGE)
 		{
 			recievedSignal = readSignal();
+			
+ 			if (recievedSignal->getMessageId() >= messageId)
+ 			{
+ 				messageId = recievedSignal->getMessageId() + 1;
+ 			}
 			
 			// Preprocess status
 			switch (status)
@@ -130,11 +147,11 @@ void SRL::Slave::updateSCOM(void)
 					break;
 					
 					default:
-						sendSum(recievedSignal->getSum());
 						delete lastRecievedSignal;
 						lastRecievedSignal = new Signal(recievedSignal);
 						delete lastSentSignal;
 						lastSentSignal = NULL;
+						sendSum(recievedSignal->getSum());
 					break;
 				}
 			break;
@@ -145,7 +162,6 @@ void SRL::Slave::updateSCOM(void)
 				lastRecievedInfoMessage = new InfoMessage(recievedInfoMessage);
 				delete lastSentInfoMessage;
 				lastSentInfoMessage = NULL;
-				
 			break;
 			
 			// ACK, ABF or resent message has arrived
@@ -171,10 +187,9 @@ void SRL::Slave::updateSCOM(void)
 					break;
 					
 					default:
-						sendSum(recievedSignal->getMessage());
-					
 						delete lastRecievedSignal;
 						lastRecievedSignal = new Signal(recievedSignal);
+						sendSum(recievedSignal->getMessage());
 					break;
 				}
 			break;
@@ -216,6 +231,16 @@ void SRL::Slave::updateSCOM(void)
 					default:
 						sendSignal(ABF);
 					break;
+				}
+			break;
+			
+			case WAITING_FOR_SIGNAL:
+				if (waitingForSignalFrom != 0L)
+				{
+					if (millis() >= waitingForSignalFrom + SIGNAL_TIMEOUT)
+					{
+						status = CONNECTION_CLOSED;
+					}
 				}
 			break;
 			
