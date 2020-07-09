@@ -63,9 +63,9 @@ void SRL::MPU6050::initialize(void)
 *	@param setting The sensitivity setting.
 *
 * @return
-* Returns true if the setting was sucessfully updated.
+* Returns 0 if the setting was sucessfully updated.
 */
-bool SRL::MPU6050::setAccelSensitivity(uint8_t setting)
+uint8_t SRL::MPU6050::setAccelSensitivity(uint8_t setting)
 {
 	switch (setting)
 	{
@@ -86,7 +86,7 @@ bool SRL::MPU6050::setAccelSensitivity(uint8_t setting)
 			break;
 
 		default:
-			return false;
+			return 1;
 	}
 
 	return writeBits(MPU6050_ACCEL_CONFIG, MPU6050_ACCEL_CONFIG_FS_SEL_BIT, MPU6050_ACCEL_CONFIG_FS_SEL_LENGTH, setting);
@@ -103,9 +103,9 @@ bool SRL::MPU6050::setAccelSensitivity(uint8_t setting)
 *	@param setting The sensitivity setting.
 *
 *	@return
-*	Returns true if the setting was sucessfully updated.
+*	Returns 0 if the setting was sucessfully updated.
 */
-bool SRL::MPU6050::setGyroSensitivity(uint8_t setting)
+uint8_t SRL::MPU6050::setGyroSensitivity(uint8_t setting)
 {
 	switch (setting)
 	{
@@ -126,7 +126,7 @@ bool SRL::MPU6050::setGyroSensitivity(uint8_t setting)
 			break;
 
 		default:
-			return false;
+			return 1;
 	}
 
 	return writeBits(MPU6050_GYRO_CONFIG, MPU6050_GYRO_CONFIG_FS_SEL_BIT, MPU6050_GYRO_CONFIG_FS_SEL_LENGTH, setting);

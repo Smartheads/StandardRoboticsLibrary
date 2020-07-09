@@ -30,11 +30,11 @@ namespace SRL {
   class CommProtocol
   {
     public:
-      virtual bool writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint8_t start = 0) = 0;
-      bool writeByte(uint8_t reg, byte data);
-      bool writeBits(uint8_t reg, uint8_t startBit, uint8_t len, byte data);
+      virtual uint8_t writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint8_t start = 0) = 0;
+      uint8_t writeByte(uint8_t reg, byte data);
+      uint8_t writeBits(uint8_t reg, uint8_t startBit, uint8_t len, byte data);
 
-      virtual void readBytes(uint8_t reg, byte* buff, uint8_t len) = 0;
+      virtual uint8_t readBytes(uint8_t reg, byte* buff, uint8_t len) = 0;
       byte readByte(uint8_t reg);
       int16_t readInt16_t(uint8_t reg);
 

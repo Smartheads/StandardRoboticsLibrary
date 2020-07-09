@@ -47,12 +47,10 @@ SRL::BMP280::~BMP280(void)
 *	Initializer method for class BMP280.
 *
 *	@param basePressure Pressure reading at ground level in Pa. Used in calculating altitude.
-*	@return bool True if successfull.
+*	@return Returns 0 if successful and 1 if not.
 */
-bool SRL::BMP280::initialize(double basePressure)
+uint8_t SRL::BMP280::initialize(double basePressure)
 {
-	Wire.begin();
-	
 	this->basePressure = basePressure;
 	
 	// Read calibration data
@@ -69,7 +67,7 @@ bool SRL::BMP280::initialize(double basePressure)
 	readSShort(BMP280_DIG_P8, &dig_P8);
 	readSShort(BMP280_DIG_P9, &dig_P9);
 	
-	return setMode(NORMAL_MODE) && setOversampling(STANDARD_RES);
+	return (setMode(NORMAL_MODE) == 0 && setOversampling(STANDARD_RES) == 0) ? 0 : 1;
 }
 
 /**
@@ -83,22 +81,23 @@ bool SRL::BMP280::initialize(double basePressure)
 *	@see BMP280 Product specification from Bosch.
 *
 *	@param value Oversampling value
-*	@return Returns true if successfull.
+*	@return Returns 0 if successful and 1 if not.
 */
-bool SRL::BMP280::setOversampling(unsigned int value)
+uint8_t SRL::BMP280::setOversampling(unsigned int value)
 {	
-	byte* buff = new byte(2);
+	byte buff[2];
 	
-	readBytes(BMP280_CTRL_MEAS, buff, 2);
+	if (readBytes(BMP280_CTRL_MEAS, buff, 2) != 0)
+	{
+		return 1;
+	}
+	
 	byte mode = buff[1] << 2;
 	
 	buff[0] = value >> 2;
 	buff[1] = (value << 2) | mode;
 	
-	bool ret = writeBytes(BMP280_CTRL_MEAS, 2, buff);
-	
-	delete[] buff;
-	return ret;
+	return writeBytes(BMP280_CTRL_MEAS, 2, buff);
 }
 
 /**
@@ -109,47 +108,19 @@ bool SRL::BMP280::setOversampling(unsigned int value)
 
 *	@return Returns true if successfull.
 */
-bool SRL::BMP280::setMode(byte value)
+uint8_t SRL::BMP280::setMode(byte value)
 {
-	byte* buff = new byte(2);
+	byte buff[2];
 	
-	readBytes(BMP280_CTRL_MEAS, buff, 2);
+	if (readBytes(BMP280_CTRL_MEAS, buff, 2) != 0)
+	{
+		return 1;
+	}
 
 	buff[1] &= 0xC; // Mask
 	buff[1] = buff[1] | value;
 	
-	bool ret = writeBytes(BMP280_CTRL_MEAS, 2, buff);
-	
-	delete[] buff;
-	return ret;
-}
-
-/**
-*	Reads an unsigned short from the BMP280.
-*
-*	@param reg Register to read
-*	@param ushort Pointer to the unsigned short to write to
-*/
-void SRL::BMP280::readUShort(uint8_t reg, unsigned short* ushort)
-{
-	byte* buff = new byte(2);
-	readBytes(reg, buff, 2);
-	*ushort = (unsigned short) (buff[0] << 8 | buff[1]);
-	delete[] buff;
-}
-
-/**
-*	Reads a signed short from the BMP280.
-*
-*	@param reg Register to read
-*	@param ushort Pointer to the signed short to write to
-*/
-void SRL::BMP280::readSShort(uint8_t reg, signed short* sshort)
-{
-	byte* buff = new byte(2);
-	readBytes(reg, buff, 2);
-	*sshort = (signed short) (buff[0] << 8 | buff[1]);
-	delete[] buff;
+	return writeBytes(BMP280_CTRL_MEAS, 2, buff);
 }
 
 /**
@@ -160,13 +131,11 @@ void SRL::BMP280::readSShort(uint8_t reg, signed short* sshort)
 double SRL::BMP280::getPressure(void)
 {
 	// Get uncalculated pressure measurements
-	byte* pbuffer = new byte[3];
+	byte pbuffer[3];
 	readBytes(BMP280_PRESS, pbuffer, 3);
 
 	double press = (double)(pbuffer[0] * 4096 + pbuffer[1] * 16 + pbuffer[2] / 16);
 	double temp = getTemperature() * 5120.0;
-	
-	delete[] pbuffer;
 	
 	double var1 = (temp / 2.0) - 64000.0;
 	double var2 = var1 * var1 * dig_P6 / 32768.0;
@@ -195,7 +164,7 @@ double SRL::BMP280::getPressure(void)
 */
 double SRL::BMP280::getTemperature(void)
 {
-	byte* tbuffer = new byte[3];
+	byte tbuffer[3];
 	readBytes(BMP280_TEMP, tbuffer, 3);
 	
 	double temp = (double)(tbuffer[0] * 4096 + tbuffer[1] * 16 + tbuffer[2] / 16);

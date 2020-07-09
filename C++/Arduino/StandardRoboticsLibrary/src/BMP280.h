@@ -20,6 +20,8 @@
 * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
+*
+*	NOTE: This library only works on microcontrollers with at least 32 bit architectures.
 */
 #ifndef SRL_BMP_180
 #define SRL_BMP_180
@@ -56,9 +58,9 @@ namespace SRL
 			BMP280(uint8_t addr = BMP280_DEFAULT_ADDRESS);
 			~BMP280(void);
 			
-			bool initialize(double basePressure = 101325);
-			bool setOversampling(unsigned int value);
-			bool setMode(byte value);
+			uint8_t initialize(double basePressure = 101325);
+			uint8_t setOversampling(unsigned int value);
+			uint8_t setMode(byte value);
 			
 			void setBasePressure(double basePressure);
 			double getBasePressure(void);
@@ -90,9 +92,6 @@ namespace SRL
 			} mode;
 			
 		private:
-			void readUShort(uint8_t reg, unsigned short* ushort);
-			void readSShort(uint8_t reg, signed short* sshort);
-			
 			double basePressure;
 			
 			// Calibration data

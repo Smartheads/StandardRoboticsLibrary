@@ -40,8 +40,10 @@ namespace SRL
 		public:
 			I2CDevice(uint8_t address);
 
-			bool writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint8_t start = 0);
-			void readBytes(uint8_t reg, byte* buff, uint8_t len);
+			uint8_t writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint8_t start = 0);
+			uint8_t readBytes(uint8_t reg, byte* buff, uint8_t len);
+			uint8_t readUShort(uint8_t reg, unsigned short* ushort);
+			uint8_t readSShort(uint8_t reg, signed short* sshort);
 	};
 }
 

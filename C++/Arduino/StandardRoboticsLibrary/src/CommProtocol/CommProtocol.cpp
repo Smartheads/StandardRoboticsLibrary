@@ -33,7 +33,7 @@
 * @return
 *	Returns true if the data was sucessfully sent.
 */
-bool SRL::CommProtocol::writeByte(uint8_t reg, byte data)
+uint8_t SRL::CommProtocol::writeByte(uint8_t reg, byte data)
 {
 	return writeBytes(reg, 1, &data);
 }
@@ -50,7 +50,7 @@ bool SRL::CommProtocol::writeByte(uint8_t reg, byte data)
 * @return
 *	Returns true if the data was sucessfully overwritten.
 */
-bool SRL::CommProtocol::writeBits(uint8_t reg, uint8_t startBit, uint8_t len, byte data)
+uint8_t SRL::CommProtocol::writeBits(uint8_t reg, uint8_t startBit, uint8_t len, byte data)
 {
 	byte b = readByte(reg);
 
@@ -60,9 +60,7 @@ bool SRL::CommProtocol::writeBits(uint8_t reg, uint8_t startBit, uint8_t len, by
 	b &= ~(mask);
 	b |= data;
 
-	bool s = writeByte(reg, b);
-
-	return s;
+	return writeByte(reg, b);
 }
 
 /**

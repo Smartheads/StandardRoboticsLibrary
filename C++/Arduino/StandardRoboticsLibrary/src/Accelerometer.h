@@ -61,7 +61,7 @@ namespace SRL
 
       void setAccelOffsets(int16_t x, int16_t y, int16_t z);
 
-      virtual bool setAccelSensitivity(uint8_t setting) = 0;
+      virtual uint8_t setAccelSensitivity(uint8_t setting) = 0;
 
       void calcAccelOffsets(uint8_t orientation = Y_UP, bool console = false, unsigned int iterations = 50);
 
