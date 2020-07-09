@@ -82,7 +82,7 @@ void SRL::Gyroscope::calcGyroOffsets(bool console, unsigned int iterations)
 		Serial.print("x: "); Serial.print(getGyroXOffset());
 		Serial.print(" y: "); Serial.print(getGyroYOffset());
 		Serial.print(" z: "); Serial.println(getGyroZOffset());
-		Serial.println("Your gyroscope readings are:");
+		Serial.println("Your raw gyroscope readings are:");
 		Serial.print("x: "); Serial.print(getRawGyroX() - getGyroXOffset());
 		Serial.print(" y: "); Serial.print(getRawGyroY() - getGyroYOffset());
 		Serial.print(" z: "); Serial.println(getRawGyroZ() - getGyroZOffset());
@@ -101,7 +101,7 @@ double SRL::Gyroscope::getGyroY(void)
 
 double SRL::Gyroscope::getGyroZ(void)
 {
-	return (getRawGyroZ() - gyroXOffset) / gyroSensitivity;
+	return (getRawGyroZ() - gyroZOffset) / gyroSensitivity;
 }
 
 /**

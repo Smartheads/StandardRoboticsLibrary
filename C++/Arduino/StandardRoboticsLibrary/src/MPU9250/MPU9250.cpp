@@ -37,6 +37,16 @@ SRL::MPU9250::MPU9250(uint8_t address, float aC, float gC) : I2CDevice(address),
 }
 
 /**
+*	Destructor for class MPU9250.
+*
+*
+*/
+SRL::MPU9250::~MPU9250(void)
+{
+
+}
+
+/**
 *	Initializes the MPU9250 for use.
 *	@return Returns 0 if successfull and 1 if not.
 */
