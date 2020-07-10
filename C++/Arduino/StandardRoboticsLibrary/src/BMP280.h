@@ -32,7 +32,7 @@
 #include <Statistics.h>
 
 #define BMP280_COMPONENT_NAME "BMP280"
-#define BMP280_DEFAULT_ADDRESS 0x78
+#define BMP280_DEFAULT_ADDRESS 0x76
 #define BMP280_CTRL_MEAS 0xF4
 #define BMP280_PRESS 0xF7
 #define BMP280_TEMP	0xFA
@@ -50,6 +50,18 @@
 #define BMP280_DIG_P8 0x9C
 #define BMP280_DIG_P9 0x9E
 
+// Power modes (@see device manual chapter 3.6)
+#define BMP280_SLEEP_MODE 0x00
+#define BMP280_FORCED_MODE 0x01
+#define BMP280_NORMAL_MODE 0x03
+
+// Oversampling settings
+#define BMP280_1X_OVERSAMPLING 0x01
+#define BMP280_2X_OVERSAMPLING 0x02
+#define BMP280_4X_OVERSAMPLING 0x03
+#define BMP280_8X_OVERSAMPLING 0x04
+#define BMP280_16X_OVERSAMPLING 0x05
+
 namespace SRL
 {
 	class BMP280 : public SRL::Component, public SRL::I2CDevice
@@ -59,8 +71,9 @@ namespace SRL
 			~BMP280(void);
 			
 			uint8_t initialize(double basePressure = 101325);
-			uint8_t setOversampling(unsigned int value);
-			uint8_t setMode(byte value);
+			uint8_t setPressureOversampling(byte value);
+			uint8_t setTemperatureOversampling(byte value);
+			uint8_t setPowerMode(byte value);
 			
 			void setBasePressure(double basePressure);
 			double getBasePressure(void);
@@ -73,23 +86,6 @@ namespace SRL
 			double getMedianTemperature(unsigned int samples = 5);
 			double getMedianPressure(unsigned int samples = 5);
 			double getMedianAltitude(unsigned int samples = 5);
-			
-			
-			typedef enum
-			{
-				ULTRA_LOW_POWER = 0x9,
-				LOW_POWER = 0x11,
-				STANDARD_RES = 0x19,
-				HIGH_RES = 0x21,
-				ULTRA_HIGH_RES = 0x22
-			} oversampling;
-			
-			typedef enum
-			{
-				SLEEP_MODE = 0x00,
-				FORCED_MODE = 0x01,
-				NORMAL_MODE = 0x03
-			} mode;
 			
 		private:
 			double basePressure;

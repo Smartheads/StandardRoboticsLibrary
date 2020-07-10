@@ -48,7 +48,7 @@ uint8_t SRL::I2CDevice::writeBytes(uint8_t reg, uint8_t bytec, byte* bytev, uint
 	Wire.beginTransmission(address);
 	Wire.write(reg);
 
-	byte data[bytec - start];
+	byte data[bytec - start] = { 0 };
 
 	for (int i = start; i < bytec; i++)
 	{
@@ -91,20 +91,22 @@ uint8_t SRL::I2CDevice::readBytes(uint8_t reg, byte* buff, uint8_t len)
 /**
 *	Reads an unsigned short from the I2C device.
 *
+*	Number format: ADDRESS [LSB], ADDRESS+1 [MSB]
+*
 *	@param reg Register to read
 *	@param ushort Pointer to the unsigned short to write to
 *	@return Returns 0 (false) if successful, and 1 (true) if not.
 */
 uint8_t SRL::I2CDevice::readUShort(uint8_t reg, unsigned short* ushort)
 {
-	byte buff[2];
+	byte buff[2] = { 0 };
 	
-	if (readBytes(reg, buff, 2) == 1)
+	if (readBytes(reg, buff, 2) != 0)
 	{
 		return 1;
 	}
 	
-	*ushort = (unsigned short) (buff[0] << 8 | buff[1]);
+	*ushort = (unsigned short) (((unsigned short) buff[1] << 8) | ((unsigned short) buff[0]));
 	
 	return 0;
 }
@@ -112,20 +114,22 @@ uint8_t SRL::I2CDevice::readUShort(uint8_t reg, unsigned short* ushort)
 /**
 *	Reads a signed short from the I2C device.
 *
+*	Number format: ADDRESS [LSB], ADDRESS+1 [MSB]
+
 *	@param reg Register to read
 *	@param ushort Pointer to the signed short to write to
 *	@return Returns 0 (false) if successful and 1 (true) if not.
 */
 uint8_t SRL::I2CDevice::readSShort(uint8_t reg, signed short* sshort)
 {
-	byte buff[2];
+	byte buff[2] = { 0 };
 	
-	if(readBytes(reg, buff, 2) == 1)
+	if(readBytes(reg, buff, 2) != 0)
 	{
 		return 1;
 	}
 	
-	*sshort = (signed short) (buff[0] << 8 | buff[1]);
+	*sshort = (signed short) (((signed short) buff[1] << 8) | ((signed short)buff[0]));
 	
 	return 0;
 }
