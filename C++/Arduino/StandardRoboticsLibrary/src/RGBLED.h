@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2019 Robert Hutter
+* Copyright (c) 2020 Robert Hutter
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -53,6 +53,8 @@ namespace SRL
 		byte green;
 		byte blue;
 	} color;
+	
+	bool compareColor(color a, color b);
 
 	class rgbled : public Component
 	{

@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2019 Robert Hutter
+* Copyright (c) 2020 Robert Hutter
 * 
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -27,6 +27,17 @@
 */
 
 #include <RGBLED.h>
+
+/**
+*	Compares two SRL::color data types to see if they match.
+*
+*	@param a
+*	@param b
+*/
+bool SRL::compareColor(color a, color b)
+{
+	return (a.red == b.red && a.green == b.green && a.blue == b.blue);
+}
 
 /**
 *	Constructor for the class RGB LED.
@@ -72,6 +83,15 @@ SRL::rgbled::~rgbled()
 void SRL::rgbled::setColor(byte red, byte green, byte blue)
 {
 	setColor(color {red, green, blue});
+}
+
+/**
+*	Returns the current color of the RGB led.
+*
+*/
+SRL::color SRL::rgbled::getColor(void)
+{
+	return *this->ledcol;
 }
 
 /**
