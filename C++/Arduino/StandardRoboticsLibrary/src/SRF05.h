@@ -24,9 +24,9 @@
 #ifndef _SRF05_H
 #define _SRF05_H
 
-#include <SRL.h>
-#include <Sonar.h>
-#include <Component.h>
+#include "SRL.h"
+#include "Sonar.h"
+#include "Component.h"
 
 #define SRF05_COMPONENT_NAME "SRF05"
 #define PING_OVERHEAD 5

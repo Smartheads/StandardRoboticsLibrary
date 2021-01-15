@@ -24,9 +24,9 @@
 #ifndef _ENCODER_H
 #define _ENCODER_H
 
-#include <SRL.h>
-#include <Component.h>
-#include <Paul_encoder.h>
+#include "SRL.h"
+#include "Component.h"
+#include "Paul_encoder.h"
 
 namespace SRL
 {

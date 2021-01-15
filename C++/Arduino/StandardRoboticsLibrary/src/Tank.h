@@ -24,8 +24,8 @@
 #ifndef _TANK_H
 #define _TANK_H
 
-#include <SRL.h>
-#include <Motor.h>
+#include "SRL.h"
+#include "Motor.h"
 
 namespace SRL
 {

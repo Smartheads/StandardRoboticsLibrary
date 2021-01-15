@@ -21,38 +21,72 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 *
-* Buzzer.h - Header file for class Buzzer, which controls piezoelectric buzzers.
+* Buzzer.cpp - Source code of class and functions regarding piezzo buzzers.
 *
 */
 
-#ifndef BUZZER_H
-#define BUZZER_H
+#include "Buzzer.h"
 
-#include "SRL.h"
-#include "Component.h"
-
-#define BUZZER_COMPONENT_NAME "buzzer"
-
-#define ON true
-#define OFF false
-
-namespace SRL
+/**
+*	Constructor for the class Buzzer.
+*
+*	@param pin
+*/
+SRL::Buzzer::Buzzer(uint8_t pin) : Component(BUZZER_COMPONENT_NAME, Component::SOUND)
 {
-	class Buzzer : public Component
-	{
-		public:
-			Buzzer(uint8_t pin);
-			~Buzzer();
-		
-			void turnOff(void);
-			void turnOn(void);
-			void setState(bool state);
-			bool getState(void);
-		
-		private:
-			uint8_t* const pin = new uint8_t;
-			bool* const state = new bool;
-	};
+	*this->pin = pin;
+	pinMode(pin, OUTPUT);
+	
+	setState(OFF);
 }
 
-#endif
+/**
+*	Destructor for the class Buzzer.
+*
+*/
+SRL::Buzzer::~Buzzer()
+{
+	delete pin;
+	delete state;
+}
+
+/**
+*	Turns the buzzer off.
+*
+*/
+void SRL::Buzzer::turnOff(void)
+{
+	*state = OFF;
+	digitalWrite(*pin, LOW);
+}
+
+/**
+*	Turns the buzzer on.
+*
+*/
+void SRL::Buzzer::turnOn(void)
+{
+	*state = ON;
+	digitalWrite(*pin, HIGH);
+}
+
+/**
+*	Sets the state of the buzzer. ON = true, OFF = false.
+*
+*/
+void SRL::Buzzer::setState(bool state)
+{
+	if (state)
+		turnOn();
+	else
+		turnOff();
+}
+
+/**
+*	Returns the state of the buzzer. True = ON, false = OFF.
+*
+*/
+bool SRL::Buzzer::getState(void)
+{
+	return *state;
+}

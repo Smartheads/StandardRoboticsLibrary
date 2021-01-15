@@ -24,7 +24,7 @@
 #ifndef SCOM_SLAVE_H
 #define SCOM_SLAVE_H
 
-#include <SCOM.h>
+#include "SCOM.h"
 
 namespace SRL
 {

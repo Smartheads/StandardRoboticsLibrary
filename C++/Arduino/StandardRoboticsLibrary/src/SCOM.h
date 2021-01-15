@@ -24,7 +24,7 @@
 #ifndef SRL_SCOM_H
 #define SRL_SCOM_H
 
-#include <SRL.h>
+#include "SRL.h"
 
 #define VERSION 1204
 

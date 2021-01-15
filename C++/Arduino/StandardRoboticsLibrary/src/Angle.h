@@ -24,7 +24,7 @@
 #ifndef _ANGLE_h
 #define _ANGLE_h
 
-#include <SRL.h>
+#include "SRL.h"
 #include <math.h>
 
 namespace SRL

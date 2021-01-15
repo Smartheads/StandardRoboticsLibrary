@@ -24,8 +24,8 @@
 #ifndef _SONAR_H
 #define _SONAR_H
 
-#include <SRL.h>
-#include <Component.h>
+#include "SRL.h"
+#include "Component.h"
 
 #define NO_ECHO 0
 #define PING_MEDIAN_DELAY 29000

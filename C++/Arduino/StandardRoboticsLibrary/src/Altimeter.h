@@ -24,8 +24,8 @@
 #ifndef SRL_ALTIMETER
 #define SRL_ALTIMETER
 
-#include <SRL.h>
-#include <Component.h>
+#include "SRL.h"
+#include "Component.h"
 
 namespace SRL
 {

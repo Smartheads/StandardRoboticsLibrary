@@ -24,10 +24,10 @@
 #ifndef _MPU9250_H
 #define _MPU9250_H
 
-#include <SRL.h>
-#include <I2C.h>
-#include <AccelGyro.h>
-#include <Component.h>
+#include "SRL.h"
+#include "I2C.h"
+#include "AccelGyro.h"
+#include "Component.h"
 
 #define MPU9250_COMPONENT_NAME "MPU9250"
 #define MPU9250_ADDR 0x68

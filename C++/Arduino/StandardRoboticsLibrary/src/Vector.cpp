@@ -21,47 +21,76 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
 * SOFTWARE.
 */
-#ifndef _COMPONENT_H
-#define _COMPONENT_H
+#include "Vector.h"
 
-#include "SRL.h"
-
-namespace SRL
+SRL::Vector::Vector(double x, double y)
 {
-  class Component
-  {
-    public:
-      Component(void);
-      Component(String name, unsigned int type);
-
-      void initialize(void);
-
-      /* Getters & setters: */
-      unsigned int getId(void);
-      String getName(void);
-      unsigned int getType(void);
-
-      /* Static variables */
-      static unsigned int lastId;
-
-      /* Enums */
-      typedef enum
-      {
-        ROTARY_ENCODER = 1,
-        ACCELEROMETER = 2,
-        GYROSCOPE = 3,
-        ACCEL_GYRO = 4,
-        SONAR = 5,
-        LIGHT = 6,
-        SOUND = 7,
-		BAROMETER = 8
-      } types;
-
-    protected:
-      String name;
-      unsigned int type;
-      unsigned int id;
-  };
+	this->x = x;
+	this->y = y;
+	updateLength();
 }
 
-#endif
+SRL::Vector::Vector(SRL::Angle direction, double length)
+{
+	this->x = (length * cos(((90 - direction.getSize()) * PI) / 180));
+	this->y = (length * cos((direction.getSize() * PI) / 180));
+}
+
+SRL::Vector SRL::Vector::addition(Vector a, Vector b)
+{
+	return Vector(a.getX() + b.getX(), a.getY() + b.getY());
+}
+
+SRL::Vector SRL::Vector::addition(int argc, Vector * argv)
+{
+	Vector v(0, 0);
+
+	for (int i = 0; i < argc; i++)
+	{
+		v = v.add(*(argv + i));
+	}
+
+	return v;
+}
+
+SRL::Vector SRL::Vector::add(Vector b)
+{
+	return Vector::addition(*this, b);
+}
+
+double SRL::Vector::getX(void)
+{
+	return x;
+}
+
+double SRL::Vector::getY(void)
+{
+	return y;
+}
+
+double SRL::Vector::getLength(void)
+{
+	return length;
+}
+
+SRL::Angle SRL::Vector::getAngle(void)
+{
+	return SRL::Angle((sinh(x / length) * PI) / 180);
+}
+
+void SRL::Vector::setX(double x)
+{
+	this->x = x;
+	updateLength();
+}
+
+void SRL::Vector::setY(double y)
+{
+	this->y = y;
+	updateLength();
+}
+
+void SRL::Vector::updateLength()
+{
+	length = sqrt(x*x + y*y);
+}

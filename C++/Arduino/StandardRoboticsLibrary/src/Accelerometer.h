@@ -24,9 +24,9 @@
 #ifndef _ACCELEROMETER_H
 #define _ACCELEROMETER_H
 
-#include <SRL.h>
-#include <Component.h>
-#include <Statistics.h>
+#include "SRL.h"
+#include "Component.h"
+#include "Statistics.h"
 
 #define ACCEL_CALIBRATION_I 25
 

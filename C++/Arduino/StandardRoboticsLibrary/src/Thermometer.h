@@ -24,6 +24,6 @@
 #ifndef SRL_THERMOMETER
 #define SRL_THERMOMETER
 
-#include <SRL.h>
+#include "SRL.h"
 
 #endif

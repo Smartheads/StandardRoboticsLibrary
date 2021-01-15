@@ -26,10 +26,10 @@
 #ifndef SRL_BMP_180
 #define SRL_BMP_180
 
-#include <SRL.h>
-#include <Component.h>
-#include <I2C.h>
-#include <Statistics.h>
+#include "SRL.h"
+#include "Component.h"
+#include "I2C.h"
+#include "Statistics.h"
 
 #define BMP280_COMPONENT_NAME "BMP280"
 #define BMP280_DEFAULT_ADDRESS 0x78

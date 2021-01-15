@@ -24,9 +24,9 @@
 #ifndef _I2C_H
 #define _I2C_H
 
-#include <SRL.h>
+#include "SRL.h"
 #include <Wire.h>
-#include <CommProtocol.h>
+#include "CommProtocol.h"
 
 namespace SRL
 {

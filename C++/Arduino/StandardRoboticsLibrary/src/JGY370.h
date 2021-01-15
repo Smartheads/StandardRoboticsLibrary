@@ -24,9 +24,9 @@
 #ifndef _JGY370
 #define _JGY370
 
-#include <SRL.h>
-#include <Encoder.h>
-#include <Motor.h>
+#include "SRL.h"
+#include "Encoder.h"
+#include "Motor.h"
 
 #define JGY370_COMPONENT_NAME "JGY370"
 #define STEP_IN_CM 0.00085

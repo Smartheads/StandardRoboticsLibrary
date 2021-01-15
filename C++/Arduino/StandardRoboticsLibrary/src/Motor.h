@@ -24,7 +24,7 @@
 #ifndef _MOTOR_h
 #define _MOTOR_h
 
-#include <SRL.h>
+#include "SRL.h"
 
 namespace SRL
 {

@@ -24,10 +24,10 @@
 #ifndef _ACCELGYRO_H
 #define _ACCELGYRO_H
 
-#include <SRL.h>
-#include <Accelerometer.h>
-#include <Gyroscope.h>
-#include <Angle.h>
+#include "SRL.h"
+#include "Accelerometer.h"
+#include "Gyroscope.h"
+#include "Angle.h"
 
 namespace SRL
 {

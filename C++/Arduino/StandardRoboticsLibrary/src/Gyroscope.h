@@ -24,9 +24,9 @@
 #ifndef _GYROSCOPE_H
 #define _GYROSCOPE_H
 
-#include <SRL.h>
-#include <Component.h>
-#include <Statistics.h>
+#include "SRL.h"
+#include "Component.h"
+#include "Statistics.h"
 
 #define GYRO_CALIBRATION_I 25
 

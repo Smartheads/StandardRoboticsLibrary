@@ -24,10 +24,10 @@
 #ifndef _MPU6050_H
 #define _MPU6050_H
 
-#include <SRL.h>
-#include <I2C.h>
-#include <AccelGyro.h>
-#include <Component.h>
+#include "SRL.h"
+#include "I2C.h"
+#include "AccelGyro.h"
+#include "Component.h"
 
 #define MPU6050_COMPONENT_NAME "MPU6050"
 #define MPU6050_ADDR         0x68

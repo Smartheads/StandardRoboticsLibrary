@@ -24,7 +24,7 @@
 #ifndef _COMMPROTOCOL_H
 #define _COMMPROTOCOL_H
 
-#include <SRL.h>
+#include "SRL.h"
 
 namespace SRL {
   class CommProtocol

@@ -29,8 +29,8 @@
 #ifndef RGBLED_H
 #define RGBLED_H
 
-#include <SRL.h>
-#include <Component.h>
+#include "SRL.h"
+#include "Component.h"
 
 #define RGBLED_COMPONENT_NAME "RGBLED"
 

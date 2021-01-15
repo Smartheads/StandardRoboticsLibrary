@@ -24,9 +24,9 @@
 #ifndef _VECTOR_h
 #define _VECTOR_h
 
-#include <SRL.h>
-#include <Angle.h>
-#include <math.h>
+#include "SRL.h"
+#include "Angle.h"
+#include "math.h"
 
 namespace SRL
 {
