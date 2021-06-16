@@ -24,7 +24,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-#include <Paul_encoder.h>
+#include "Paul_encoder.h"
 
 // Yes, all the code is in the header file, to provide the user
 // configure options with #define (before they include it), and

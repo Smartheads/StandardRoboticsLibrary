@@ -30,12 +30,12 @@
 #define Paul_Encoder_h_
 
 #if defined(ARDUINO) && ARDUINO >= 100
-#include "Arduino.h"
+#include <Arduino.h>
 #elif defined(WIRING)
-#include "Wiring.h"
+#include <Wiring.h>
 #else
-#include "WProgram.h"
-#include "pins_arduino.h"
+#include <WProgram.h>
+#include <pins_arduino.h>
 #endif
 
 #include "direct_pin_read.h"
