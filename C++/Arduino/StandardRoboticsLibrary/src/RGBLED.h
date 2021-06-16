@@ -1,18 +1,18 @@
 /*
 * MIT License
 *
-* Copyright (c) 2020 Robert Hutter
-* 
+* Copyright (c) 2021 Robert Hutter
+*
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
 * in the Software without restriction, including without limitation the rights
 * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
 * copies of the Software, and to permit persons to whom the Software is
 * furnished to do so, subject to the following conditions:
-* 
+*
 * The above copyright notice and this permission notice shall be included in all
 * copies or substantial portions of the Software.
-* 
+*
 * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
 * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
 * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
@@ -44,39 +44,34 @@
 
 namespace SRL
 {
-
-	typedef unsigned char byte;
-
 	typedef struct
 	{
-		byte red;
-		byte green;
-		byte blue;
+		uint8_t red;
+		uint8_t green;
+		uint8_t blue;
 	} color;
-	
+
 	bool compareColor(color a, color b);
 
 	class rgbled : public Component
 	{
-		public:
-			rgbled(uint8_t redpin, uint8_t greedpin, uint8_t bluepin);
-			~rgbled();
-		
-			void setColor(byte red, byte green, byte blue);
-			void setColor(color ledcol);
-			color getColor(void);
-		
-			void turnOff(void);
-			void turnOn(void);
-			void setState(bool state);
-			bool getState(void);
-		
-		private:
-			color* const ledcol = new color;
-			uint8_t* const redpin = new uint8_t;
-			uint8_t* const greenpin = new uint8_t;
-			uint8_t* const bluepin = new uint8_t;
-			bool* const ledstate = new bool;
+	public:
+		rgbled(uint8_t redpin, uint8_t greedpin, uint8_t bluepin);
+		~rgbled();
+
+		void setColor(uint8_t red, uint8_t green, uint8_t blue);
+		void setColor(color ledcol);
+		color getColor(void);
+
+		void turnOff(void);
+		void turnOn(void);
+		void setState(bool state);
+		bool getState(void);
+
+	private:
+		color ledcol;
+		uint8_t redpin, greenpin, bluepin;
+		bool ledstate;
 	};
 }
 
