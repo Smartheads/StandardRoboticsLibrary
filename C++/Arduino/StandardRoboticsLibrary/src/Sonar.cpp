@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2018 Robert Hutter
+* Copyright (c) 2021 Robert Hutter
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -33,9 +33,9 @@
 */
 SRL::Sonar::Sonar(uint8_t triggerPin, uint8_t echoPin, unsigned long maxDistanceCm)
 {
-  setTriggerPin(triggerPin);
-  setEchoPin(echoPin);
-  setMaxDistance(maxDistanceCm);
+    setTriggerPin(triggerPin);
+    setEchoPin(echoPin);
+    setMaxDistance(maxDistanceCm);
 }
 
 /**
@@ -46,7 +46,7 @@ SRL::Sonar::Sonar(uint8_t triggerPin, uint8_t echoPin, unsigned long maxDistance
 */
 double SRL::Sonar::pingCm(void)
 {
-  return convertCm(ping());
+    return convertCm(ping());
 }
 
 /**
@@ -57,7 +57,7 @@ double SRL::Sonar::pingCm(void)
 */
 double SRL::Sonar::pingMm(void)
 {
-  return pingCm() * 10;
+    return pingCm() * 10;
 }
 
 /**
@@ -69,12 +69,13 @@ double SRL::Sonar::pingMm(void)
 */
 double SRL::Sonar::convertMm(unsigned long us)
 {
-  return convertCm(us) * 10;
+    return convertCm(us) * 10;
 }
 
 /**
 * Pings the objects in front of the sensor and returns the reading's median.
 * It will discard any really off readings.
+* Note: untested since last change.
 *
 * @param interations The number of measurments to take.
 * @return
@@ -82,43 +83,47 @@ double SRL::Sonar::convertMm(unsigned long us)
 */
 unsigned long SRL::Sonar::pingMedian(unsigned int interations)
 {
-  unsigned long samples[interations], last, t;
-  unsigned int j, i = 0;
-  samples[0] = NO_ECHO;
+    unsigned long last, t;
+    unsigned long* samples = new unsigned long[interations];
+    unsigned int j, i = 0;
+    samples[0] = NO_ECHO;
 
-  while (i < interations)
-  {
-    t = micros();
-    last = ping();
-
-    if (last != NO_ECHO)
+    while (i < interations)
     {
-      if (i > 0)  // Dont sort the first sample
-      {
-        for (j = i; j > 0 && samples[j - 1] < last; j--) // Sort using the insersion method
+        t = micros();
+        last = ping();
+
+        if (last != NO_ECHO)
         {
-          samples[j] = samples[j - 1];
+            if (i > 0)  // Dont sort the first sample
+            {
+                for (j = i; j > 0 && samples[j - 1] < last; j--) // Sort using the insersion method
+                {
+                    samples[j] = samples[j - 1];
+                }
+            }
+            else
+            {
+                j = 0;
+            }
+
+            samples[j] = last;
+            i++;
         }
-      }
-      else
-      {
-        j = 0;
-      }
+        else
+        {
+            interations--;
+        }
 
-      samples[j] = last;
-      i++;
-    }
-    else
-    {
-      interations--;
+        if (i < interations && micros() - t < PING_MEDIAN_DELAY)
+        {
+            delay((PING_MEDIAN_DELAY + t - micros()) / 1000); // Delay between readings
+        }
     }
 
-    if (i < interations && micros() - t < PING_MEDIAN_DELAY)
-    {
-      delay((PING_MEDIAN_DELAY + t - micros()) / 1000); // Delay between readings
-    }
-  }
-  return samples[interations >> 1];
+    unsigned long result = samples[interations >> 1];
+    delete[] samples;
+    return result;
 }
 
 /**
@@ -131,7 +136,7 @@ unsigned long SRL::Sonar::pingMedian(unsigned int interations)
 */
 double SRL::Sonar::pingMedianCm(unsigned int interations)
 {
-  return convertCm(pingMedian(interations));
+    return convertCm(pingMedian(interations));
 }
 
 /**
@@ -144,42 +149,42 @@ double SRL::Sonar::pingMedianCm(unsigned int interations)
 */
 double SRL::Sonar::pingMedianMm(unsigned int interations)
 {
-  return pingMedianCm(interations) * 10;
+    return pingMedianCm(interations) * 10;
 }
 
 uint8_t SRL::Sonar::getTriggerPin(void)
 {
-  return triggerPin;
+    return triggerPin;
 }
 
 void SRL::Sonar::setTriggerPin(uint8_t triggerPin)
 {
-  this->triggerPin = triggerPin;
-  pinMode(this->triggerPin, OUTPUT);
+    this->triggerPin = triggerPin;
+    pinMode(this->triggerPin, OUTPUT);
 }
 
 uint8_t SRL::Sonar::getEchoPin(void)
 {
-  return echoPin;
+    return echoPin;
 }
 
 void SRL::Sonar::setEchoPin(uint8_t echoPin)
 {
-  this->echoPin = echoPin;
-  pinMode(this->echoPin, INPUT);
+    this->echoPin = echoPin;
+    pinMode(this->echoPin, INPUT);
 }
 
 double SRL::Sonar::getMaxDistance(void)
 {
-  return convertCm(maxDistance);
+    return convertCm(maxDistance);
 }
 
 void SRL::Sonar::setMaxDistance(unsigned long us)
 {
-  this->maxDistance = us;
+    this->maxDistance = us;
 }
 
 void SRL::Sonar::setMaxDistance(double cm)
 {
-  this->maxDistance = convertUs(cm);
+    this->maxDistance = convertUs(cm);
 }

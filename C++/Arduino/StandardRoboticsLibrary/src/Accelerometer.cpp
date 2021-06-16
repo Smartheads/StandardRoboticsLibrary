@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2018 Robert Hutter
+* Copyright (c) 2021 Robert Hutter
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -54,33 +54,33 @@ void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, uns
 	}
 
 	switch (orientation) {
-		case X_UP:
-			targetX = accelSensitivity;
-			break;
+	case X_UP:
+		targetX = accelSensitivity;
+		break;
 
-		case X_DOWN:
-			targetX = -1 * accelSensitivity;
-			break;
+	case X_DOWN:
+		targetX = -1 * accelSensitivity;
+		break;
 
-		case Y_UP:
-			targetY = accelSensitivity;
-			break;
+	case Y_UP:
+		targetY = accelSensitivity;
+		break;
 
-		case Y_DOWN:
-			targetY = -1 * accelSensitivity;
-			break;
+	case Y_DOWN:
+		targetY = -1 * accelSensitivity;
+		break;
 
-		case Z_UP:
-			targetZ = accelSensitivity;
-			break;
+	case Z_UP:
+		targetZ = accelSensitivity;
+		break;
 
-		case Z_DOWN:
-			targetZ = -1 * accelSensitivity;
-			break;
+	case Z_DOWN:
+		targetZ = -1 * accelSensitivity;
+		break;
 
-		default:
-			calcAccelOffsets();
-			return;
+	default:
+		calcAccelOffsets();
+		return;
 	}
 
 	for (int x = 0; x < iterations; x++)
@@ -89,9 +89,9 @@ void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, uns
 
 		for (unsigned int i = 0; i < ACCEL_CALIBRATION_I; i++)
 		{
-				accelX += getRawAccelX() - getAccelXOffset();
-				accelY += getRawAccelY() - getAccelYOffset();
-				accelZ += getRawAccelZ() - getAccelZOffset();
+			accelX += getRawAccelX() - getAccelXOffset();
+			accelY += getRawAccelY() - getAccelYOffset();
+			accelZ += getRawAccelZ() - getAccelZOffset();
 		}
 
 		if (console)
@@ -104,10 +104,10 @@ void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, uns
 		accelZ /= ACCEL_CALIBRATION_I;
 
 		setAccelOffsets(
-			 (targetX - accelX) * -1 + getAccelXOffset(),
-			 (targetY - accelY) * -1 + getAccelYOffset(),
-			 (targetZ - accelZ) * -1 + getAccelZOffset()
-		 );
+			(targetX - accelX) * -1 + getAccelXOffset(),
+			(targetY - accelY) * -1 + getAccelYOffset(),
+			(targetZ - accelZ) * -1 + getAccelZOffset()
+		);
 	}
 
 	if (console)
@@ -125,49 +125,58 @@ void SRL::Accelerometer::calcAccelOffsets(uint8_t orientation, bool console, uns
 
 /**
 *	Returns the median of raw accelerometer readings on the x-axis.
+*	Note: untested since last change.
 *
 * @param iterations The number of readings to take.
 */
 int16_t SRL::Accelerometer::getRawAccelXMedian(unsigned int iterations)
 {
-	int16_t samples[iterations];
+	int16_t* samples = new int16_t[iterations];
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		samples[i] = getRawAccelX();
 	}
 
-	return getMedian<int16_t>(iterations, samples);
+	int16_t result = getMedian<int16_t>(iterations, samples);
+	delete[] samples;
+	return result;
 }
 
 /**
 *	Returns the median of raw accelerometer readings on the y-axis.
+*	Note: untested since last change.
 *
 * @param iterations The number of readings to take.
 */
 int16_t SRL::Accelerometer::getRawAccelYMedian(unsigned int iterations)
 {
-	int16_t samples[iterations];
+	int16_t* samples = new int16_t[iterations];
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		samples[i] = getRawAccelY();
 	}
 
-	return getMedian<int16_t>(iterations, samples);
+	int16_t result = getMedian<int16_t>(iterations, samples);
+	delete[] samples;
+	return result;
 }
 /**
 *	Returns the median of raw accelerometer readings on the z-axis.
+*	Note: untested since last change.
 *
 * @param iterations The number of readings to take.
 */
 int16_t SRL::Accelerometer::getRawAccelZMedian(unsigned int iterations)
 {
-	int16_t samples[iterations];
+	int16_t* samples = new int16_t[iterations];
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		samples[i] = getRawAccelZ();
 	}
 
-	return getMedian<int16_t>(iterations, samples);
+	int16_t result = getMedian<int16_t>(iterations, samples);
+	delete[] samples;
+	return result;
 }
 
 double SRL::Accelerometer::getAccelXMedian(unsigned int iterations)

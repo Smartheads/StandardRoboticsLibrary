@@ -1,7 +1,7 @@
 /*
 * MIT License
 *
-* Copyright (c) 2018 Robert Hutter
+* Copyright (c) 2021 Robert Hutter
 *
 * Permission is hereby granted, free of charge, to any person obtaining a copy
 * of this software and associated documentation files (the "Software"), to deal
@@ -111,45 +111,53 @@ double SRL::Gyroscope::getGyroZ(void)
 */
 int16_t SRL::Gyroscope::getRawGyroXMedian(unsigned int iterations)
 {
-	int16_t samples[iterations];
+	int16_t* samples = new int16_t[iterations];
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		samples[i] = getRawGyroX();
 	}
 
-	return getMedian<int16_t>(iterations, samples);
+	int16_t result = getMedian<int16_t>(iterations, samples);
+	delete[] samples;
+	return result;
 }
 
 /**
 *	Returns the median of raw gyroscope readings on the y-axis.
+*	Note: untested since last change.
 *
 *	@param iterations The number of readings to take.
 */
 int16_t SRL::Gyroscope::getRawGyroYMedian(unsigned int iterations)
 {
-	int16_t samples[iterations];
+	int16_t* samples = new int16_t[iterations];
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		samples[i] = getRawGyroY();
 	}
 
-	return getMedian<int16_t>(iterations, samples);
+	int16_t result = getMedian<int16_t>(iterations, samples);
+	delete[] samples;
+	return result;
 }
 
 /**
 *	Returns the median of raw gyroscope readings on the z-axis.
+*	Note: untested since last change.
 *
 *	@param iterations The number of readings to take.
 */
 int16_t SRL::Gyroscope::getRawGyroZMedian(unsigned int iterations)
 {
-	int16_t samples[iterations];
+	int16_t* samples = new int16_t[iterations];
 	for (unsigned int i = 0; i < iterations; i++)
 	{
 		samples[i] = getRawGyroZ();
 	}
 
-	return getMedian<int16_t>(iterations, samples);
+	int16_t result = getMedian<int16_t>(iterations, samples);
+	delete[] samples;
+	return result;
 }
 
 double SRL::Gyroscope::getGyroXMedian(unsigned int iterations)
