@@ -171,12 +171,10 @@ uint8_t SdFile::makeDir(SdFile* dir, const char* dirname)
 {
 	if (dir->path != NULL)
 	{
-		char* path = new char[strlen(dir->path) + strlen(dirname) + 1]; // +1 for \0
-		strcpy_s(path, strlen(dir->path) + 1, dir->path);
-		strcpy_s(path + strlen(dir->path), strlen(dirname) + 1, dirname); // \0 included
+		std::string path(dir->path);
+		path.append(dirname); // Append dirname to own path
 		
-		bool result = CreateDirectoryA(path, NULL);
-		delete[] path;
+		bool result = CreateDirectoryA(path.c_str(), NULL);
 
 		if (result)
 		{
@@ -204,21 +202,18 @@ uint8_t SdFile::makeDir(SdFile* dir, const char* dirname)
 uint8_t SdFile::open(SdFile* dir, const char* fname, uint8_t mode)
 {
 	// Check to see if fname is a directory, concatenate path with fname
-	char* path = new char[strlen(dir->path) + strlen(fname) + 1]; // +1 for \0
-	strcpy_s(path, strlen(dir->path) + 1, dir->path);
-	strcpy_s(path + strlen(dir->path), strlen(fname) + 1, fname); // \0 included
+	std::string path(dir->path);
+	path.append(fname);
 
-	DWORD result = GetFileAttributesA(path);
+	DWORD result = GetFileAttributesA(path.c_str());
 	if (result & FILE_ATTRIBUTE_DIRECTORY && result != INVALID_FILE_ATTRIBUTES)
 	{
 		// File is a directory, append \\ to the end of the path
-		char* newpath = new char[strlen(path) + 2]; // +1 for \\ and +1 for \0
-		strcpy_s(newpath, strlen(path) + 1, path);
-		newpath[strlen(path)] = '\\';
-		newpath[strlen(path) + 1] = '\0';
-		delete[] path;
+		path.append("\\");
 
-		this->path = newpath;
+		// Set this->path
+		this->path = new char[path.length() + 1];
+		strcpy_s((char*)this->path, path.length() + 1, path.c_str());
 
 		vard::logevent(vard::Level::INFO, "SdFile.open called. File is a dir. fname=%s mode=%u", fname, mode);
 		return 1;
@@ -226,7 +221,7 @@ uint8_t SdFile::open(SdFile* dir, const char* fname, uint8_t mode)
 
 	// Set file path and create file
 	this->path = dir->path;
-	fopen_s(&file, path, "w");
+	fopen_s(&file, path.c_str(), "w");
 
 	// Copy fname
 	this->fname = new char[strlen(fname) + 1];
